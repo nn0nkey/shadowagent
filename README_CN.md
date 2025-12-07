@@ -151,7 +151,7 @@ cp .env.example .env
 LLM_PROVIDER=openai
 LLM_MODEL=claude-sonnet-4-5-20250929
 XAIO_API_KEY=your-api-key-here
-XAIO_API_BASE=https://api.coolyeah.net/v1
+XAIO_API_BASE=https://api.openai.com/v1
 
 # 顾问可以使用不同的模型
 ADVISOR_LLM_MODEL=claude-sonnet-4-5-20250929
@@ -456,7 +456,7 @@ result = search_knowledge.invoke({
 ```bash
 LLM_PROVIDER=openai
 LLM_MODEL=claude-sonnet-4-5-20250929
-XAIO_API_BASE=https://api.coolyeah.net/v1
+XAIO_API_BASE=https://api.openai.com/v1
 XAIO_API_KEY=your-api-key
 ```
 
