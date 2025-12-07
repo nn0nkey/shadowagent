@@ -1,0 +1,151 @@
+# H-Pentest Kali Linux容器镜像 - 支持选择镜像源
+# 基于官方Kali镜像，预装核心渗透测试工具
+
+FROM kalilinux/kali-rolling:latest
+
+# 设置非root用户提高安全性
+ARG USER=pentester
+ARG UID=1000
+ARG GID=1000
+
+# 可配置的镜像源
+ARG MIRROR_SOURCE=aliyun  # 可选: aliyun, tsinghua, ustc, official
+
+# 环境变量
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# 根据参数选择镜像源（使用HTTP避免SSL问题）
+RUN case "${MIRROR_SOURCE}" in \
+    "tsinghua") \
+        echo "deb http://mirrors.tuna.tsinghua.edu.cn/kali/ kali-rolling main non-free contrib" > /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.tuna.tsinghua.edu.cn/kali/ kali-rolling main non-free contrib" >> /etc/apt/sources.list ;; \
+    "aliyun") \
+        echo "deb http://mirrors.aliyun.com/kali kali-rolling main non-free contrib" > /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.aliyun.com/kali kali-rolling main non-free contrib" >> /etc/apt/sources.list ;; \
+    "ustc") \
+        echo "deb http://mirrors.ustc.edu.cn/kali/ kali-rolling main non-free contrib" > /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.ustc.edu.cn/kali/ kali-rolling main non-free contrib" >> /etc/apt/sources.list ;; \
+    "huawei") \
+        echo "deb http://mirrors.huaweicloud.com/kali/ kali-rolling main non-free contrib" > /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.huaweicloud.com/kali/ kali-rolling main non-free contrib" >> /etc/apt/sources.list ;; \
+    "163") \
+        echo "deb http://mirrors.163.com/kali/ kali-rolling main non-free contrib" > /etc/apt/sources.list && \
+        echo "deb-src http://mirrors.163.com/kali/ kali-rolling main non-free contrib" >> /etc/apt/sources.list ;; \
+    "official"|*) \
+        echo "deb http://http.kali.org/kali kali-rolling main non-free contrib" > /etc/apt/sources.list && \
+        echo "deb-src http://http.kali.org/kali kali-rolling main non-free contrib" >> /etc/apt/sources.list ;; \
+    esac
+
+# 安装基础工具和Python环境
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        # 基础工具
+        curl wget git vim nano zip unzip tar \
+        python3 python3-pip python3-venv python3-dev \
+        build-essential cmake pkg-config \
+        # 网络工具
+        nmap netcat-traditional telnet dnsutils \
+        sslscan ssdeep nbtscan smbclient \
+        # Web工具
+        nikto gobuster dirb dirbuster wpscan \
+        whatweb ffuf wfuzz \
+        # 密码工具
+        hydra john hashcat crunch \
+        wordlists seclists \
+        # 漏洞扫描
+        masscan nuclei \
+        # 漏洞利用
+        metasploit-framework \
+        # 信息收集
+        amass recon-ng subfinder theharvester \
+        # 数据库工具
+        sqlmap \
+        # 其他工具
+        yara radare2 binwalk exiftool \
+        # 清理
+        && apt-get autoremove -y && \
+        apt-get autoclean && \
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# 创建pentester用户
+RUN groupadd -g $GID $USER && \
+    useradd -m -s /bin/bash -u $UID -g $GID $USER && \
+    echo "$USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# 安装gosu用于用户切换
+RUN apt-get update && apt-get install -y gosu && rm -rf /var/lib/apt/lists/*
+
+# 设置工作目录
+WORKDIR /workspace
+
+# 创建工作空间目录结构
+RUN mkdir -p /workspace/{tools,data,temp,logs} && \
+    echo 'export PATH=$PATH:/opt/tools' >> ~/.bashrc && \
+    echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> ~/.bashrc
+
+# 安装Python工具
+RUN mkdir -p /home/$USER/.local/bin && \
+    echo 'export PATH=$PATH:/home/'$USER'/.local/bin' >> ~/.bashrc
+
+# 创建快速扫描脚本
+RUN cat > /home/$USER/.local/bin/quick-scan << 'EOF' && chmod +x /home/$USER/.local/bin/quick-scan
+#!/bin/bash
+# 快速扫描脚本
+TARGET=$1
+if [ -z "$TARGET" ]; then
+    echo "Usage: quick-scan <target>"
+    exit 1
+fi
+
+echo "=== Quick Scan Results for $TARGET ==="
+echo ""
+
+# 端口扫描
+echo "1. Port Scan (nmap):"
+nmap -sV -T4 -p- --min-rate=1000 $TARGET
+
+echo ""
+echo "2. Web Scan (nikto):"
+nikto -h http://$TARGET
+
+echo ""
+echo "3. Directory Scan (gobuster):"
+gobuster dir -u http://$TARGET -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 50
+
+echo ""
+echo "=== Scan Complete ==="
+EOF
+
+# 加载Metasploit配置
+RUN echo "source /usr/share/metasploit-framework/msfconsole.rc" >> ~/.bashrc 2>/dev/null || true
+
+# 安装额外的Python库
+RUN pip3 install --no-cache-dir \
+    requests \
+    beautifulsoup4 \
+    pwntools \
+    paramiko \
+    scapy \
+    python-nmap
+
+# 复制启动脚本
+COPY --chown=$USER:$USER scripts/entrypoint.sh /home/$USER/entrypoint.sh
+RUN chmod +x /home/$USER/entrypoint.sh
+
+# 切换到pentester用户
+USER $USER
+
+# 设置环境变量
+ENV PATH="/home/$USER/.local/bin:${PATH}"
+
+# 暴露端口（根据需要调整）
+EXPOSE 4444 8080 8000 3000
+
+# 入口点
+ENTRYPOINT ["/home/pentester/entrypoint.sh"]
+CMD ["/bin/bash"]

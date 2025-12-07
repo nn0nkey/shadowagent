@@ -1,0 +1,1440 @@
+{
+  "IDOR-攻击库": {
+    "doc_id": "IDOR-攻击库",
+    "title": "IDOR 不安全直接对象引用 - 攻击库",
+    "file_path": "knowledge/know/IDOR-攻击库.md",
+    "content_length": 19505,
+    "last_updated": "2025-11-17T01:27:36.052385",
+    "vuln_type": "idor",
+    "tags": [
+      "UUID枚举",
+      "JWT篡改",
+      "Header注入",
+      "Cookie伪造",
+      "水平越权"
+    ],
+    "summary": "通过篡改URL/POST/Cookie/Header/JWT中的对象ID实现未授权访问",
+    "difficulty": "easy",
+    "key_techniques": [
+      "顺序ID枚举",
+      "JWT无签名解码",
+      "Header字段注入",
+      "Cookie参数伪造"
+    ],
+    "frameworks": [
+      "Flask"
+    ],
+    "attack_chain": "登录后篡改ID参数越权访问他人数据"
+  },
+  "SQL注入-WAF绕过技术-攻击库": {
+    "doc_id": "SQL注入-WAF绕过技术-攻击库",
+    "title": "SQL注入-WAF绕过技术 攻击库",
+    "file_path": "knowledge/know/SQL注入-WAF绕过技术-攻击库.md",
+    "content_length": 12774,
+    "last_updated": "2025-11-17T01:27:38.477492",
+    "vuln_type": "sql_injection",
+    "tags": [
+      "WAF绕过",
+      "大小写混淆",
+      "注释符混淆",
+      "编码绕过",
+      "空白字符替换"
+    ],
+    "summary": "利用大小写、注释、编码及空白字符变形绕过WAF检测执行SQL注入",
+    "difficulty": "medium",
+    "key_techniques": [
+      "大小写混淆",
+      "/**/注释符拆分",
+      "URL/Unicode/Hex多重编码",
+      "Tab/换行/括号替换空格"
+    ],
+    "frameworks": [
+      "MySQL",
+      "ModSecurity",
+      "Cloudflare WAF",
+      "AWS WAF"
+    ],
+    "attack_chain": "编码混淆→WAF绕过→注入执行"
+  },
+  "SSTI-盲注时间延迟-攻击库": {
+    "doc_id": "SSTI-盲注时间延迟-攻击库",
+    "title": "SSTI-盲注时间延迟-攻击库",
+    "file_path": "knowledge/know/SSTI-盲注时间延迟-攻击库.md",
+    "content_length": 24654,
+    "last_updated": "2025-11-17T01:27:41.984900",
+    "vuln_type": "ssti",
+    "tags": [
+      "Jinja2",
+      "时间盲注",
+      "sleep延迟",
+      "无回显",
+      "条件判断"
+    ],
+    "summary": "利用sleep/循环在无回显SSTI场景下通过响应时间差逐字符盲注数据",
+    "difficulty": "medium",
+    "key_techniques": [
+      "subprocess调用sleep",
+      "time.sleep()",
+      "条件延迟payload",
+      "ASCII二分逐字符爆破"
+    ],
+    "frameworks": [
+      "Flask/Django/Jinja2/Twig"
+    ],
+    "attack_chain": "注入sleep payload→测响应延迟→条件延迟盲注逐字符"
+  },
+  "JWT-权限提升攻击库": {
+    "doc_id": "JWT-权限提升攻击库",
+    "title": "JWT - 权限提升攻击库",
+    "file_path": "knowledge/know/JWT-权限提升攻击库.md",
+    "content_length": 14871,
+    "last_updated": "2025-11-17T01:27:44.861594",
+    "vuln_type": "jwt",
+    "tags": [
+      "alg=none",
+      "RS256→HS256混淆",
+      "弱密钥爆破",
+      "Payload篡改",
+      "权限提升"
+    ],
+    "summary": "通过算法混淆、弱密钥爆破或Payload篡改绕过JWT签名验证实现权限提升",
+    "difficulty": "medium",
+    "key_techniques": [
+      "alg=none签名移除",
+      "RS256公钥当HS256密钥",
+      "弱密钥字典爆破",
+      "Payload字段篡改"
+    ],
+    "frameworks": [
+      "JWT通用"
+    ],
+    "attack_chain": "篡改JWT→绕过签名→提升权限"
+  },
+  "OGNL注入-Struts攻击库": {
+    "doc_id": "OGNL注入-Struts攻击库",
+    "title": "OGNL注入 - Struts攻击库",
+    "file_path": "knowledge/know/OGNL注入-Struts攻击库.md",
+    "content_length": 13660,
+    "last_updated": "2025-11-17T01:27:47.641473",
+    "vuln_type": "command_injection",
+    "tags": [
+      "OGNL",
+      "Struts2",
+      "ProcessBuilder",
+      "Runtime.exec",
+      "RCE",
+      "WAF绕过"
+    ],
+    "summary": "利用OGNL表达式注入执行任意Java代码，通过ProcessBuilder/Runtime.exec实现远程命令执行",
+    "difficulty": "medium",
+    "key_techniques": [
+      "ProcessBuilder链式调用",
+      "Unicode编码混淆",
+      "注释分隔关键字",
+      "Response直接回显"
+    ],
+    "frameworks": [
+      "Struts2"
+    ],
+    "attack_chain": "OGNL注入→禁用安全限制→ProcessBuilder执行命令→回显结果"
+  },
+  "SSTI-Include文件包含-攻击库": {
+    "doc_id": "SSTI-Include文件包含-攻击库",
+    "title": "SSTI-Include文件包含-攻击库",
+    "file_path": "knowledge/know/SSTI-Include文件包含-攻击库.md",
+    "content_length": 25205,
+    "last_updated": "2025-11-17T01:27:48.277365",
+    "vuln_type": "ssti",
+    "tags": [
+      "Jinja2",
+      "Include指令",
+      "路径遍历",
+      "os.path.commonprefix绕过",
+      "符号链接"
+    ],
+    "summary": "利用模板include指令路径遍历读取任意文件",
+    "difficulty": "medium",
+    "key_techniques": [
+      "../遍历",
+      "URL双重编码",
+      "符号链接绕过",
+      "commonprefix字符串前缀绕过"
+    ],
+    "frameworks": [
+      "Flask",
+      "Django"
+    ],
+    "attack_chain": "构造../路径遍历包含敏感文件"
+  },
+  "OAuth认证绕过-攻击库": {
+    "doc_id": "OAuth认证绕过-攻击库",
+    "title": "OAuth 2.0 认证绕过攻击库",
+    "file_path": "knowledge/know/OAuth认证绕过-攻击库.md",
+    "content_length": 23227,
+    "last_updated": "2025-11-17T01:27:51.292248",
+    "vuln_type": "auth_bypass",
+    "tags": [
+      "OAuth 2.0",
+      "授权码拦截",
+      "redirect_uri绕过",
+      "令牌泄露",
+      "账户接管"
+    ],
+    "summary": "通过拦截或操纵授权码与重定向地址，绕过OAuth验证直接获取访问令牌",
+    "difficulty": "medium",
+    "key_techniques": [
+      "redirect_uri子域名绕过",
+      "路径遍历注入",
+      "开放重定向利用",
+      "URL编码混淆"
+    ],
+    "frameworks": [],
+    "attack_chain": "诱骗授权→拦截code→兑换token→访问资源"
+  },
+  "反序列化-攻击库": {
+    "doc_id": "反序列化-攻击库",
+    "title": "不安全反序列化 - 攻击库",
+    "file_path": "knowledge/know/反序列化-攻击库.md",
+    "content_length": 9101,
+    "last_updated": "2025-11-17T01:27:54.622394",
+    "vuln_type": "deserialization",
+    "tags": [
+      "PHP序列化",
+      "Cookie篡改",
+      "Base64编码",
+      "认证绕过"
+    ],
+    "summary": "伪造PHP序列化cookie直接获得admin身份",
+    "difficulty": "easy",
+    "key_techniques": [
+      "PHP序列化格式构造",
+      "Cookie Base64编码",
+      "管理员凭据伪造"
+    ],
+    "frameworks": [
+      "PHP"
+    ],
+    "attack_chain": "伪造序列化cookie→Base64编码→发送请求→绕过认证"
+  },
+  "快速参考-渗透测试检查清单": {
+    "doc_id": "快速参考-渗透测试检查清单",
+    "title": "渗透测试快速参考 - 通用检查清单",
+    "file_path": "knowledge/know/快速参考-渗透测试检查清单.md",
+    "content_length": 8099,
+    "last_updated": "2025-11-17T01:27:57.410917",
+    "vuln_type": "other",
+    "tags": [
+      "渗透测试清单",
+      "信息收集",
+      "IDOR",
+      "XSS",
+      "SQL注入",
+      "OWASP",
+      "自动化扫描"
+    ],
+    "summary": "覆盖信息收集、IDOR、XSS、SQL注入的通用渗透测试速查清单",
+    "difficulty": "easy",
+    "key_techniques": [
+      "目录爆破",
+      "参数篡改",
+      "Cookie窃取",
+      "UNION注入",
+      "盲注检测"
+    ],
+    "frameworks": [
+      "Apache",
+      "Nginx",
+      "IIS",
+      "Django",
+      "Flask",
+      "Spring",
+      "Laravel"
+    ],
+    "attack_chain": "信息收集→漏洞识别→手工验证→利用Payload"
+  },
+  "XSS-JavaScript上下文注入-攻击库": {
+    "doc_id": "XSS-JavaScript上下文注入-攻击库",
+    "title": "XSS-JavaScript上下文注入-攻击库",
+    "file_path": "knowledge/know/XSS-JavaScript上下文注入-攻击库.md",
+    "content_length": 15510,
+    "last_updated": "2025-11-17T01:27:59.805351",
+    "vuln_type": "xss",
+    "tags": [
+      "JavaScript上下文注入",
+      "字符串闭合",
+      "引号绕过",
+      "Unicode编码",
+      "模板字符串"
+    ],
+    "summary": "闭合JS字符串后直接注入恶意代码执行XSS",
+    "difficulty": "easy",
+    "key_techniques": [
+      "双引号/单引号闭合",
+      "Unicode\\u0022绕过",
+      "十六进制\\x22绕过",
+      "模板字符串`${}`注入"
+    ],
+    "frameworks": [
+      "PHP",
+      "Java",
+      "Node.js"
+    ],
+    "attack_chain": "闭合引号→注入JS→注释后续"
+  },
+  "反序列化漏洞利用-攻击库": {
+    "doc_id": "反序列化漏洞利用-攻击库",
+    "title": "反序列化漏洞利用 攻击库",
+    "file_path": "knowledge/know/反序列化漏洞利用-攻击库.md",
+    "content_length": 18404,
+    "last_updated": "2025-11-17T01:28:02.548278",
+    "vuln_type": "deserialization",
+    "tags": [
+      "Pickle",
+      "__reduce__",
+      "Cookie投毒",
+      "Base64编码",
+      "RCE"
+    ],
+    "summary": "利用__reduce__构造恶意Pickle对象，通过Cookie触发反序列化RCE",
+    "difficulty": "easy",
+    "key_techniques": [
+      "__reduce__魔术方法",
+      "Base64封装Payload",
+      "Cookie传递序列化数据"
+    ],
+    "frameworks": [
+      "Python"
+    ],
+    "attack_chain": "Cookie携带Base64 Pickle→服务器反序列化→RCE"
+  },
+  "HTTP请求走私-攻击库": {
+    "doc_id": "HTTP请求走私-攻击库",
+    "title": "HTTP请求走私 攻击库",
+    "file_path": "knowledge/know/HTTP请求走私-攻击库.md",
+    "content_length": 9166,
+    "last_updated": "2025-11-17T01:28:04.659874",
+    "vuln_type": "other",
+    "tags": [
+      "HTTP请求走私",
+      "CL.TE",
+      "TE.CL",
+      "缓存投毒",
+      "会话劫持"
+    ],
+    "summary": "利用前后端对Content-Length与Transfer-Encoding解析差异走私恶意请求",
+    "difficulty": "hard",
+    "key_techniques": [
+      "CL.TE混淆",
+      "TE.CL混淆",
+      "缓存投毒Payload构造",
+      "延迟检测"
+    ],
+    "frameworks": [],
+    "attack_chain": "走私请求→绕过访问控制→投毒缓存/劫持会话"
+  },
+  "路径遍历-配置绕过-攻击库": {
+    "doc_id": "路径遍历-配置绕过-攻击库",
+    "title": "路径遍历-配置绕过 攻击库",
+    "file_path": "knowledge/know/路径遍历-配置绕过-攻击库.md",
+    "content_length": 15530,
+    "last_updated": "2025-11-17T01:28:07.376402",
+    "vuln_type": "lfi",
+    "tags": [
+      "路径遍历",
+      "Nginx alias",
+      "off-by-slash",
+      "配置绕过",
+      "目录穿越"
+    ],
+    "summary": "利用Nginx alias与location斜杠不一致实现目录穿越读文件",
+    "difficulty": "easy",
+    "key_techniques": [
+      "off-by-slash",
+      "../穿越",
+      "alias路径拼接"
+    ],
+    "frameworks": [
+      "Nginx"
+    ],
+    "attack_chain": "构造../穿越alias路径读取任意文件"
+  },
+  "CVE-WordPress插件漏洞-攻击库": {
+    "doc_id": "CVE-WordPress插件漏洞-攻击库",
+    "title": "CVE - WordPress插件漏洞攻击库",
+    "file_path": "knowledge/know/CVE-WordPress插件漏洞-攻击库.md",
+    "content_length": 17252,
+    "last_updated": "2025-11-17T01:28:11.094786",
+    "vuln_type": "lfi",
+    "tags": [
+      "WordPress插件",
+      "CVE-2023-6553",
+      "未授权文件读取",
+      "路径遍历",
+      "backup-heart.php"
+    ],
+    "summary": "直接访问backup-heart.php并传入file参数读取任意文件",
+    "difficulty": "easy",
+    "key_techniques": [
+      "直接访问插件文件绕过认证",
+      "file参数路径遍历",
+      "admin-ajax.php未授权端点"
+    ],
+    "frameworks": [
+      "PHP/WordPress"
+    ],
+    "attack_chain": "插件文件直接访问→file参数读取→路径遍历→任意文件泄露"
+  },
+  "NoSQL注入-攻击库": {
+    "doc_id": "NoSQL注入-攻击库",
+    "title": "NoSQL注入 攻击库",
+    "file_path": "knowledge/know/NoSQL注入-攻击库.md",
+    "content_length": 17864,
+    "last_updated": "2025-11-17T01:28:13.338650",
+    "vuln_type": "other",
+    "tags": [
+      "NoSQL注入",
+      "MongoDB",
+      "操作符注入",
+      "盲注",
+      "认证绕过"
+    ],
+    "summary": "利用MongoDB操作符注入绕过认证并盲注数据",
+    "difficulty": "medium",
+    "key_techniques": [
+      "$ne操作符绕过",
+      "正则盲注",
+      "时间盲注"
+    ],
+    "frameworks": [],
+    "attack_chain": "操作符注入→认证绕过→盲注数据"
+  },
+  "IDOR-订单操作-攻击库": {
+    "doc_id": "IDOR-订单操作-攻击库",
+    "title": "IDOR-订单操作 攻击库",
+    "file_path": "knowledge/know/IDOR-订单操作-攻击库.md",
+    "content_length": 15776,
+    "last_updated": "2025-11-17T01:28:15.438108",
+    "vuln_type": "idor",
+    "tags": [
+      "订单ID枚举",
+      "收据泄露",
+      "权限绕过",
+      "会话保持"
+    ],
+    "summary": "通过遍历订单ID直接获取他人订单收据与敏感数据",
+    "difficulty": "easy",
+    "key_techniques": [
+      "订单ID遍历",
+      "收据接口未鉴权",
+      "会话复用",
+      "正则提取flag"
+    ],
+    "frameworks": [
+      "Flask"
+    ],
+    "attack_chain": "登录后枚举订单ID越权查看收据"
+  },
+  "文件上传-攻击库": {
+    "doc_id": "文件上传-攻击库",
+    "title": "文件上传 - 攻击库",
+    "file_path": "knowledge/know/文件上传-攻击库.md",
+    "content_length": 5491,
+    "last_updated": "2025-11-17T01:28:17.976245",
+    "vuln_type": "file_upload",
+    "tags": [
+      "PHP WebShell",
+      "扩展名绕过",
+      "MIME绕过",
+      "空字节截断",
+      "大小写混淆"
+    ],
+    "summary": "无验证文件上传直接写WebShell，多绕过手法秒拿RCE",
+    "difficulty": "easy",
+    "key_techniques": [
+      "双写扩展名",
+      "大小写混淆",
+      "空字节截断",
+      "Content-Type伪造",
+      "路径遍历"
+    ],
+    "frameworks": [
+      "PHP"
+    ],
+    "attack_chain": "上传PHP Shell→绕过过滤→访问执行→RCE"
+  },
+  "IDOR-权限验证缺失-攻击库": {
+    "doc_id": "IDOR-权限验证缺失-攻击库",
+    "title": "IDOR-权限验证缺失 攻击库",
+    "file_path": "knowledge/know/IDOR-权限验证缺失-攻击库.md",
+    "content_length": 17929,
+    "last_updated": "2025-11-17T01:28:20.282776",
+    "vuln_type": "idor",
+    "tags": [
+      "对象引用遍历",
+      "权限验证缺失",
+      "BOLA",
+      "用户ID枚举",
+      "Cookie会话劫持"
+    ],
+    "summary": "通过遍历对象ID绕过授权，直接访问他人数据",
+    "difficulty": "easy",
+    "key_techniques": [
+      "ID递增枚举",
+      "响应状态码判断",
+      "敏感信息正则提取"
+    ],
+    "frameworks": [
+      "Flask"
+    ],
+    "attack_chain": "登录后遍历ID越权访问"
+  },
+  "CVE-Apache路径遍历-攻击库": {
+    "doc_id": "CVE-Apache路径遍历-攻击库",
+    "title": "CVE - Apache路径遍历攻击库",
+    "file_path": "knowledge/know/CVE-Apache路径遍历-攻击库.md",
+    "content_length": 16231,
+    "last_updated": "2025-11-17T01:28:21.124199",
+    "vuln_type": "lfi",
+    "tags": [
+      "路径遍历",
+      "URL编码绕过",
+      "CGI RCE",
+      "CVE-2021-41773",
+      "CVE-2021-42013",
+      "双重编码",
+      "mod_cgi"
+    ],
+    "summary": "利用.%2e编码绕过路径校验，读取任意文件并借助CGI模块实现命令执行",
+    "difficulty": "medium",
+    "key_techniques": [
+      ".%2e编码绕过",
+      "双重URL编码",
+      "CGI POST注入",
+      "alias目录遍历"
+    ],
+    "frameworks": [
+      "Apache HTTP Server"
+    ],
+    "attack_chain": "编码绕过→路径遍历→文件读取→CGI注入RCE"
+  },
+  "竞态条件-并发攻击-攻击库": {
+    "doc_id": "竞态条件-并发攻击-攻击库",
+    "title": "竞态条件-并发攻击 攻击库",
+    "file_path": "knowledge/know/竞态条件-并发攻击-攻击库.md",
+    "content_length": 14587,
+    "last_updated": "2025-11-17T01:28:23.615867",
+    "vuln_type": "other",
+    "tags": [
+      "Race Condition",
+      "TOCTOU",
+      "并发攻击",
+      "线程竞争",
+      "会话切换"
+    ],
+    "summary": "利用并发请求在权限检查与使用间隙切换会话身份",
+    "difficulty": "medium",
+    "key_techniques": [
+      "多线程并发",
+      "会话状态切换",
+      "TOCTOU窗口抢占"
+    ],
+    "frameworks": [
+      "Flask"
+    ],
+    "attack_chain": "并发请求抢占检查-使用窗口切换身份"
+  },
+  "API安全测试-攻击库": {
+    "doc_id": "API安全测试-攻击库",
+    "title": "API安全测试 攻击库",
+    "file_path": "knowledge/know/API安全测试-攻击库.md",
+    "content_length": 23215,
+    "last_updated": "2025-11-17T01:28:26.584057",
+    "vuln_type": "idor",
+    "tags": [
+      "BOLA",
+      "IDOR",
+      "对象级授权",
+      "枚举遍历",
+      "JWT令牌"
+    ],
+    "summary": "利用令牌遍历用户ID越权访问他人订单/支付等敏感数据",
+    "difficulty": "easy",
+    "key_techniques": [
+      "ID枚举",
+      "多HTTP方法探测",
+      "敏感端点拼接",
+      "403/401状态分析"
+    ],
+    "frameworks": [
+      "REST API",
+      "GraphQL"
+    ],
+    "attack_chain": "枚举ID→越权访问→横向越权敏感接口"
+  },
+  "SSRF-本地服务访问-攻击库": {
+    "doc_id": "SSRF-本地服务访问-攻击库",
+    "title": "SSRF-本地服务访问-攻击库",
+    "file_path": "knowledge/know/SSRF-本地服务访问-攻击库.md",
+    "content_length": 27438,
+    "last_updated": "2025-11-17T01:28:29.510793",
+    "vuln_type": "ssrf",
+    "tags": [
+      "urllib",
+      "requests",
+      "127.0.0.1绕过",
+      "localhost黑名单",
+      "file://",
+      "gopher://",
+      "内网探测"
+    ],
+    "summary": "利用服务端URL获取功能访问本地与内网服务绕过访问控制",
+    "difficulty": "easy",
+    "key_techniques": [
+      "IP十进制/八进制编码",
+      "DNS重绑定",
+      "gopher协议打Redis",
+      "file协议读文件",
+      "0.0.0.0与localhost混用"
+    ],
+    "frameworks": [
+      "Flask",
+      "PHP",
+      "Java"
+    ],
+    "attack_chain": "构造恶意URL触发服务端请求本地/内网服务"
+  },
+  "权限提升-业务逻辑-攻击库": {
+    "doc_id": "权限提升-业务逻辑-攻击库",
+    "title": "权限提升 & 业务逻辑 - 攻击库",
+    "file_path": "knowledge/know/权限提升-业务逻辑-攻击库.md",
+    "content_length": 6565,
+    "last_updated": "2025-11-17T01:28:32.230326",
+    "vuln_type": "auth_bypass",
+    "tags": [
+      "hidden-field-tampering",
+      "parameter-tampering",
+      "isAdmin",
+      "HTML-hidden-input"
+    ],
+    "summary": "篡改隐藏字段isAdmin=true直接获得管理员权限",
+    "difficulty": "easy",
+    "key_techniques": [
+      "hidden-input-modification",
+      "POST-parameter-tampering",
+      "curl-payload"
+    ],
+    "frameworks": [
+      "PHP"
+    ],
+    "attack_chain": "改isAdmin参数→直接登录管理员"
+  },
+  "IDOR-间接对象引用-攻击库": {
+    "doc_id": "IDOR-间接对象引用-攻击库",
+    "title": "IDOR - 间接对象引用攻击库",
+    "file_path": "knowledge/know/IDOR-间接对象引用-攻击库.md",
+    "content_length": 16370,
+    "last_updated": "2025-11-17T01:28:36.136595",
+    "vuln_type": "idor",
+    "tags": [
+      "间接IDOR",
+      "关系建立",
+      "归档/评论/共享",
+      "业务逻辑绕过",
+      "多步攻击"
+    ],
+    "summary": "先通过无权限检查操作与目标资源建立关系，再利用该关系绕过后续权限校验访问敏感数据",
+    "difficulty": "medium",
+    "key_techniques": [
+      "归档建立archiver关系",
+      "评论成为commenter",
+      "共享添加协作者",
+      "状态修改无鉴权"
+    ],
+    "frameworks": [
+      "Flask"
+    ],
+    "attack_chain": "无鉴权操作→建立资源关系→凭关系读取敏感数据"
+  },
+  "IDOR-HTTP头部注入-攻击库": {
+    "doc_id": "IDOR-HTTP头部注入-攻击库",
+    "title": "IDOR-HTTP头部注入 攻击库",
+    "file_path": "knowledge/know/IDOR-HTTP头部注入-攻击库.md",
+    "content_length": 12070,
+    "last_updated": "2025-11-17T01:28:40.327779",
+    "vuln_type": "idor",
+    "tags": [
+      "HTTP头部注入",
+      "X-Forwarded-For伪造",
+      "IP白名单绕过",
+      "权限提升"
+    ],
+    "summary": "伪造X-Forwarded-For等头部绕过IP白名单实现未授权访问",
+    "difficulty": "easy",
+    "key_techniques": [
+      "X-Forwarded-For伪造",
+      "多头部叠加",
+      "内网IP枚举",
+      "十进制IP绕过"
+    ],
+    "frameworks": [
+      "PHP",
+      "Nginx"
+    ],
+    "attack_chain": "伪造IP头部→绕过访问控制→获取管理员权限"
+  },
+  "XSS-HTML标签属性注入-攻击库": {
+    "doc_id": "XSS-HTML标签属性注入-攻击库",
+    "title": "XSS-HTML标签属性注入-攻击库",
+    "file_path": "knowledge/know/XSS-HTML标签属性注入-攻击库.md",
+    "content_length": 16905,
+    "last_updated": "2025-11-17T01:28:43.014425",
+    "vuln_type": "xss",
+    "tags": [
+      "HTML属性注入",
+      "事件处理器",
+      "autofocus自动触发",
+      "引号闭合"
+    ],
+    "summary": "闭合属性引号注入onfocus等事件处理器实现无交互XSS",
+    "difficulty": "easy",
+    "key_techniques": [
+      "双引号闭合",
+      "autofocus自动触发",
+      "onerror/img注入"
+    ],
+    "frameworks": [
+      "Flask"
+    ],
+    "attack_chain": "闭合引号注入事件处理器自动触发XSS"
+  },
+  "SSTI-Jinja2模板注入-攻击库": {
+    "doc_id": "SSTI-Jinja2模板注入-攻击库",
+    "title": "SSTI-Jinja2模板注入 攻击库",
+    "file_path": "knowledge/know/SSTI-Jinja2模板注入-攻击库.md",
+    "content_length": 15223,
+    "last_updated": "2025-11-17T01:28:46.530912",
+    "vuln_type": "ssti",
+    "tags": [
+      "Jinja2",
+      "Flask",
+      "__subclasses__",
+      "RCE",
+      "模板注入"
+    ],
+    "summary": "利用Jinja2模板拼接用户输入，通过__class__链获取subprocess.Popen执行系统命令",
+    "difficulty": "medium",
+    "key_techniques": [
+      "__class__.__mro__[1].__subclasses__()定位危险类",
+      "subprocess.Popen索引爆破",
+      "config/request对象属性遍历"
+    ],
+    "frameworks": [
+      "Flask",
+      "Django"
+    ],
+    "attack_chain": "拼接输入→__class__链→subprocess.Popen→RCE"
+  },
+  "XSS-JSFuck编码绕过-攻击库": {
+    "doc_id": "XSS-JSFuck编码绕过-攻击库",
+    "title": "XSS - JSFuck编码绕过攻击库",
+    "file_path": "knowledge/know/XSS-JSFuck编码绕过-攻击库.md",
+    "content_length": 12618,
+    "last_updated": "2025-11-17T01:28:49.157900",
+    "vuln_type": "xss",
+    "tags": [
+      "JSFuck编码",
+      "字符拼接绕过",
+      "Function构造器"
+    ],
+    "summary": "仅用[]()!+五字符拼出任意JS，绕过最严XSS过滤",
+    "difficulty": "hard",
+    "key_techniques": [
+      "JSFuck字符构造",
+      "Function/数组方法获取",
+      "String.fromCharCode拼接"
+    ],
+    "frameworks": [
+      "JavaScript"
+    ],
+    "attack_chain": "五字符→拼字母→拼函数→Function('alert(1)')()"
+  },
+  "PHP-strcmp绕过-攻击库": {
+    "doc_id": "PHP-strcmp绕过-攻击库",
+    "title": "PHP-strcmp绕过-攻击库",
+    "file_path": "knowledge/know/PHP-strcmp绕过-攻击库.md",
+    "content_length": 16513,
+    "last_updated": "2025-11-17T01:28:49.737157",
+    "vuln_type": "auth_bypass",
+    "tags": [
+      "strcmp数组绕过",
+      "NULL==0弱比较",
+      "PHP类型混淆"
+    ],
+    "summary": "利用strcmp遇数组返回NULL，在弱比较下NULL==0为真绕过认证",
+    "difficulty": "easy",
+    "key_techniques": [
+      "password[]=数组传参",
+      "NULL与0弱类型相等",
+      "多参数同步绕过"
+    ],
+    "frameworks": [
+      "PHP"
+    ],
+    "attack_chain": "传数组使strcmp返回NULL，弱比较为0绕过登录"
+  },
+  "SSTI-沙箱逃逸攻击库": {
+    "doc_id": "SSTI-沙箱逃逸攻击库",
+    "title": "SSTI - 沙箱逃逸攻击库",
+    "file_path": "knowledge/know/SSTI-沙箱逃逸攻击库.md",
+    "content_length": 12894,
+    "last_updated": "2025-11-17T01:28:52.251135",
+    "vuln_type": "ssti",
+    "tags": [
+      "Jinja2",
+      "attr()绕过",
+      "字符串拼接",
+      "沙箱逃逸",
+      "双下划线过滤"
+    ],
+    "summary": "利用attr()、字符串拼接与内置对象绕过双下划线及关键字过滤实现模板注入命令执行",
+    "difficulty": "medium",
+    "key_techniques": [
+      "attr()动态属性访问",
+      "字符串拼接拆分",
+      "lipsum/cycler内置对象利用",
+      "编码与字典访问绕过"
+    ],
+    "frameworks": [
+      "Flask/Jinja2"
+    ],
+    "attack_chain": "过滤绕过→获取危险对象→命令执行"
+  },
+  "CVE-攻击库": {
+    "doc_id": "CVE-攻击库",
+    "title": "CVE && 其他漏洞 - 攻击库",
+    "file_path": "knowledge/know/CVE-攻击库.md",
+    "content_length": 7270,
+    "last_updated": "2025-11-17T01:28:54.402342",
+    "vuln_type": "lfi",
+    "tags": [
+      "CVE-2021-42013",
+      "Apache 2.4.50",
+      ".%2e绕过",
+      "mod_alias",
+      "路径遍历"
+    ],
+    "summary": "利用.%2e编码绕过Apache路径限制读取任意文件",
+    "difficulty": "easy",
+    "key_techniques": [
+      ".%2e编码绕过",
+      "多层目录遍历",
+      "双层URL编码"
+    ],
+    "frameworks": [
+      "Apache HTTP Server"
+    ],
+    "attack_chain": "编码绕过→目录遍历→读取系统文件"
+  },
+  "SQL注入-布尔盲注技术-攻击库": {
+    "doc_id": "SQL注入-布尔盲注技术-攻击库",
+    "title": "SQL注入 - 布尔盲注技术攻击库",
+    "file_path": "knowledge/know/SQL注入-布尔盲注技术-攻击库.md",
+    "content_length": 14762,
+    "last_updated": "2025-11-17T01:28:58.241911",
+    "vuln_type": "sql_injection",
+    "tags": [
+      "布尔盲注",
+      "二分法",
+      "关键字绕过",
+      "LENGTH/MID/ASCII",
+      "SLEEP/BENCHMARK"
+    ],
+    "summary": "利用响应差异逐字符二分提取数据，绕过空格/关键字过滤",
+    "difficulty": "medium",
+    "key_techniques": [
+      "二分法ASCII逐字符提取",
+      "空格/**/Tab绕过",
+      "MID替代SUBSTRING",
+      "IF/CASE条件语句",
+      "SLEEP时间盲注备选"
+    ],
+    "frameworks": [
+      "PHP",
+      "MySQL"
+    ],
+    "attack_chain": "构造布尔条件→响应差异→二分法逐字符提取"
+  },
+  "XML注入攻击-攻击库": {
+    "doc_id": "XML注入攻击-攻击库",
+    "title": "XML注入攻击 攻击库",
+    "file_path": "knowledge/know/XML注入攻击-攻击库.md",
+    "content_length": 17991,
+    "last_updated": "2025-11-17T01:29:01.329041",
+    "vuln_type": "xxe",
+    "tags": [
+      "XXE",
+      "OOB",
+      "Blind XXE",
+      "文件读取",
+      "DTD",
+      "SVG"
+    ],
+    "summary": "利用XML外部实体加载本地文件或发起OOB数据外带",
+    "difficulty": "medium",
+    "key_techniques": [
+      "SYSTEM file://",
+      "OOB DNS外带",
+      "DTD参数实体嵌套",
+      "expect://执行"
+    ],
+    "frameworks": [
+      "lxml",
+      "Java DOM",
+      "PHP libxml"
+    ],
+    "attack_chain": "构造恶意DTD触发实体解析实现文件读取"
+  },
+  "LFI-路径遍历-攻击库": {
+    "doc_id": "LFI-路径遍历-攻击库",
+    "title": "LFI-路径遍历-攻击库",
+    "file_path": "knowledge/know/LFI-路径遍历-攻击库.md",
+    "content_length": 19670,
+    "last_updated": "2025-11-17T01:29:03.941512",
+    "vuln_type": "lfi",
+    "tags": [
+      "路径遍历",
+      "../序列",
+      "深度枚举",
+      "文件包含",
+      "目录穿越"
+    ],
+    "summary": "利用../序列穿越目录读取任意文件",
+    "difficulty": "easy",
+    "key_techniques": [
+      "../深度计算",
+      "自动化枚举",
+      "特征内容检测"
+    ],
+    "frameworks": [
+      "PHP",
+      "Python",
+      "Java",
+      "Node.js"
+    ],
+    "attack_chain": "构造../遍历读取敏感文件"
+  },
+  "SQL注入-简单过滤绕过-攻击库": {
+    "doc_id": "SQL注入-简单过滤绕过-攻击库",
+    "title": "SQL注入 - 简单过滤绕过攻击库",
+    "file_path": "knowledge/know/SQL注入-简单过滤绕过-攻击库.md",
+    "content_length": 14736,
+    "last_updated": "2025-11-17T01:29:06.539418",
+    "vuln_type": "sql_injection",
+    "tags": [
+      "黑名单绕过",
+      "大小写混淆",
+      "双写关键字",
+      "注释符",
+      "编码绕过"
+    ],
+    "summary": "利用大小写、双写、注释、编码等手段绕过简单黑名单过滤，实现SQL注入",
+    "difficulty": "easy",
+    "key_techniques": [
+      "大小写混淆",
+      "双写关键字",
+      "内联注释/**/",
+      "十六进制编码",
+      "逻辑运算符永真"
+    ],
+    "frameworks": [
+      "PHP"
+    ],
+    "attack_chain": "绕过过滤→构造永真→UNION提取数据"
+  },
+  "SSTI-模板注入-攻击库": {
+    "doc_id": "SSTI-模板注入-攻击库",
+    "title": "SSTI 服务端模板注入 - 攻击库",
+    "file_path": "knowledge/know/SSTI-模板注入-攻击库.md",
+    "content_length": 6129,
+    "last_updated": "2025-11-17T01:29:09.386638",
+    "vuln_type": "ssti",
+    "tags": [
+      "SSTI",
+      "Jinja2",
+      "Django",
+      "Flask",
+      "Twig",
+      "Mako",
+      "Velocity",
+      "RCE",
+      "盲注"
+    ],
+    "summary": "利用模板语法链式调用__subclasses__获取Popen实现RCE",
+    "difficulty": "medium",
+    "key_techniques": [
+      "__subclasses__索引定位Popen",
+      "时间延迟盲注",
+      "Include路径遍历"
+    ],
+    "frameworks": [
+      "Django",
+      "Flask",
+      "Mako",
+      "Velocity/Freemarker"
+    ],
+    "attack_chain": "注入模板语法→链式反射→索引Popen→命令执行"
+  },
+  "命令注入-攻击库": {
+    "doc_id": "命令注入-攻击库",
+    "title": "命令注入 - 攻击库",
+    "file_path": "knowledge/know/命令注入-攻击库.md",
+    "content_length": 4613,
+    "last_updated": "2025-11-17T01:29:13.181756",
+    "vuln_type": "command_injection",
+    "tags": [
+      "反引号执行",
+      "$()执行",
+      "Base64编码绕过",
+      "IFS空格绕过",
+      "DNS外带",
+      "时间盲注",
+      "Reverse Shell"
+    ],
+    "summary": "利用命令分隔符与编码绕过，把用户输入直接拼入系统调用实现RCE",
+    "difficulty": "easy",
+    "key_techniques": [
+      "命令分隔符链式执行",
+      "${IFS}无空格绕过",
+      "Base64/Hex编码绕过",
+      "DNS/HTTP外带盲注"
+    ],
+    "frameworks": [
+      "WordPress/PHP",
+      "Struts2/Java",
+      "通用CGI"
+    ],
+    "attack_chain": "注入分隔符→编码绕过WAF→系统命令执行→外带数据回显"
+  },
+  "SSTI-Django模板注入-攻击库": {
+    "doc_id": "SSTI-Django模板注入-攻击库",
+    "title": "SSTI - Django模板注入攻击库",
+    "file_path": "knowledge/know/SSTI-Django模板注入-攻击库.md",
+    "content_length": 14918,
+    "last_updated": "2025-11-17T01:29:16.148264",
+    "vuln_type": "ssti",
+    "tags": [
+      "Django模板引擎",
+      "from_string()",
+      "模板上下文泄露",
+      "__class__链",
+      "settings对象"
+    ],
+    "summary": "利用Django模板引擎from_string()将用户输入解析为模板代码，访问上下文、settings、request对象并链式调用__class__执行Python代码",
+    "difficulty": "medium",
+    "key_techniques": [
+      "字符串替换注入",
+      "{{settings.SECRET_KEY}}泄露",
+      "{{request}}对象遍历",
+      "__class__.__mro__链构造",
+      "{% include %}文件包含"
+    ],
+    "frameworks": [
+      "Django"
+    ],
+    "attack_chain": "用户输入→模板字符串替换→from_string解析→render执行→上下文/settings/request泄露"
+  },
+  "SSRF-攻击库": {
+    "doc_id": "SSRF-攻击库",
+    "title": "SSRF 服务端请求伪造 - 攻击库",
+    "file_path": "knowledge/know/SSRF-攻击库.md",
+    "content_length": 12274,
+    "last_updated": "2025-11-17T01:29:18.636528",
+    "vuln_type": "ssrf",
+    "tags": [
+      "file://协议",
+      "DNS重绑定",
+      "IP进制绕过",
+      "元数据窃取",
+      "内网探测"
+    ],
+    "summary": "利用URL参数触发服务端请求，绕过过滤访问内网与本地文件",
+    "difficulty": "medium",
+    "key_techniques": [
+      "多进制IP表示",
+      "@与多斜杠混淆",
+      "双重URL编码",
+      "DNS重绑定",
+      "IPv6缩写绕过"
+    ],
+    "frameworks": [
+      "PHP"
+    ],
+    "attack_chain": "构造畸形URL→绕过过滤→内网/文件读取"
+  },
+  "XXE-攻击库": {
+    "doc_id": "XXE-攻击库",
+    "title": "XXE XML外部实体注入 - 攻击库",
+    "file_path": "knowledge/know/XXE-攻击库.md",
+    "content_length": 6498,
+    "last_updated": "2025-11-17T01:29:19.897138",
+    "vuln_type": "xxe",
+    "tags": [
+      "XML外部实体",
+      "DTD注入",
+      "OOB数据提取",
+      "SOAP服务",
+      "文件读取"
+    ],
+    "summary": "利用XMLParser开启resolve_entities读取任意文件",
+    "difficulty": "easy",
+    "key_techniques": [
+      "外部实体SYSTEM文件读取",
+      "OOB DTD外带",
+      "盲XXE时间延迟",
+      "SSRF探测元数据"
+    ],
+    "frameworks": [
+      "Flask"
+    ],
+    "attack_chain": "登录后POST XML payload触发实体解析读flag"
+  },
+  "XSS-过滤绕过技术-攻击库": {
+    "doc_id": "XSS-过滤绕过技术-攻击库",
+    "title": "XSS-过滤绕过技术 攻击库",
+    "file_path": "knowledge/know/XSS-过滤绕过技术-攻击库.md",
+    "content_length": 17566,
+    "last_updated": "2025-11-17T01:29:22.919924",
+    "vuln_type": "xss",
+    "tags": [
+      "大小写混淆",
+      "双重编码",
+      "空字节",
+      "注释符",
+      "CSP绕过",
+      "WAF绕过"
+    ],
+    "summary": "利用多重编码、大小写混淆及特殊字符插入绕过黑名单与WAF，复活被过滤的XSS载荷",
+    "difficulty": "medium",
+    "key_techniques": [
+      "大小写混淆",
+      "双重URL编码",
+      "空字节与换行符插入",
+      "HTML注释分割",
+      "事件处理器变形"
+    ],
+    "frameworks": [
+      "Flask/Django/PHP/Java通用"
+    ],
+    "attack_chain": "编码混淆→黑名单绕过→浏览器解析→JS执行"
+  },
+  "密码学-Padding-Oracle攻击-攻击库": {
+    "doc_id": "密码学-Padding-Oracle攻击-攻击库",
+    "title": "密码学-Padding Oracle攻击 攻击库",
+    "file_path": "knowledge/know/密码学-Padding-Oracle攻击-攻击库.md",
+    "content_length": 17712,
+    "last_updated": "2025-11-17T01:29:26.029437",
+    "vuln_type": "other",
+    "tags": [
+      "Padding Oracle",
+      "CBC模式",
+      "PKCS7填充",
+      "逐字节解密",
+      "预言机区分"
+    ],
+    "summary": "利用CBC解密时padding错误回显差异，逐字节暴力解密密文。",
+    "difficulty": "medium",
+    "key_techniques": [
+      "逐字节异或推导",
+      "构造中间值测试",
+      "PKCS7填充验证"
+    ],
+    "frameworks": [
+      "ASP.NET",
+      "PHP",
+      "Java"
+    ],
+    "attack_chain": "篡改前一块密文→观察padding错误→推导明文字节"
+  },
+  "PHP类型比较漏洞-攻击库": {
+    "doc_id": "PHP类型比较漏洞-攻击库",
+    "title": "PHP类型比较漏洞攻击库",
+    "file_path": "knowledge/know/PHP类型比较漏洞-攻击库.md",
+    "content_length": 13626,
+    "last_updated": "2025-11-17T01:29:28.417039",
+    "vuln_type": "auth_bypass",
+    "tags": [
+      "PHP弱类型",
+      "==宽松比较",
+      "MD5魔术哈希",
+      "strcmp数组绕过",
+      "类型转换"
+    ],
+    "summary": "利用PHP宽松比较与类型转换特性绕过身份验证与权限检查",
+    "difficulty": "easy",
+    "key_techniques": [
+      "MD5魔术哈希碰撞",
+      "strcmp数组返回NULL",
+      "科学计数法0e相等"
+    ],
+    "frameworks": [
+      "PHP"
+    ],
+    "attack_chain": "宽松比较→类型转换→意外相等→认证绕过"
+  },
+  "SQL注入-攻击库": {
+    "doc_id": "SQL注入-攻击库",
+    "title": "SQL注入 - 攻击库",
+    "file_path": "knowledge/know/SQL注入-攻击库.md",
+    "content_length": 4851,
+    "last_updated": "2025-11-17T01:29:31.936916",
+    "vuln_type": "sql_injection",
+    "tags": [
+      "SQLi",
+      "盲注",
+      "UNION注入",
+      "绕过WAF",
+      "大小写混淆",
+      "注释变异",
+      "双写绕过"
+    ],
+    "summary": "利用多种编码与注释变异绕过过滤，实施布尔/时间盲注及UNION注入获取数据",
+    "difficulty": "medium",
+    "key_techniques": [
+      "大小写混淆绕过",
+      "换行与注释符号变异",
+      "双斜杠路径绕过",
+      "时间延迟盲注",
+      "UNION NULL列数探测"
+    ],
+    "frameworks": [
+      "Flask",
+      "PHP",
+      "MySQL",
+      "PostgreSQL",
+      "MSSQL",
+      "SQLite"
+    ],
+    "attack_chain": "变异payload绕过过滤→盲注/UNION注入→逐字符爆破密码"
+  },
+  "文件包含-路径遍历-攻击库": {
+    "doc_id": "文件包含-路径遍历-攻击库",
+    "title": "文件包含/路径遍历 - 攻击库",
+    "file_path": "knowledge/know/文件包含-路径遍历-攻击库.md",
+    "content_length": 5740,
+    "last_updated": "2025-11-17T01:29:36.016214",
+    "vuln_type": "lfi",
+    "tags": [
+      "路径遍历",
+      "日志投毒",
+      "PHP Wrapper",
+      "双编码",
+      "Unicode绕过"
+    ],
+    "summary": "利用多种编码与Wrapper读取系统文件并投毒日志实现RCE",
+    "difficulty": "medium",
+    "key_techniques": [
+      "双编码绕过",
+      "Unicode %c0%af",
+      "php://filter",
+      "日志投毒RCE"
+    ],
+    "frameworks": [
+      "PHP",
+      "Apache",
+      "Nginx"
+    ],
+    "attack_chain": "编码绕过→文件读取→日志投毒→RCE"
+  },
+  "00-INDEX": {
+    "doc_id": "00-INDEX",
+    "title": "渗透测试攻击库 - 完全索引",
+    "file_path": "knowledge/know/00-INDEX.md",
+    "content_length": 4210,
+    "last_updated": "2025-11-17T01:29:38.862032",
+    "vuln_type": "other",
+    "tags": [
+      "渗透测试索引",
+      "攻击库合集",
+      "105案例",
+      "无防护建议",
+      "实战导向"
+    ],
+    "summary": "汇总105个真实案例的通用化攻击技巧索引，专注利用无修复",
+    "difficulty": "medium",
+    "key_techniques": [
+      "案例映射",
+      "攻击链抽象",
+      "Payload归类",
+      "场景复用"
+    ],
+    "frameworks": [
+      "Multi"
+    ],
+    "attack_chain": "案例→漏洞类型→Payload→实战复用"
+  },
+  "XSS-攻击库": {
+    "doc_id": "XSS-攻击库",
+    "title": "XSS 跨站脚本攻击 - 攻击库",
+    "file_path": "knowledge/know/XSS-攻击库.md",
+    "content_length": 10751,
+    "last_updated": "2025-11-17T01:29:41.875303",
+    "vuln_type": "xss",
+    "tags": [
+      "反射XSS",
+      "存储XSS",
+      "DOM XSS",
+      "事件处理器",
+      "JSFuck",
+      "编码绕过"
+    ],
+    "summary": "利用多种编码与事件处理器绕过WAF，实现反射/存储/DOM三型XSS",
+    "difficulty": "medium",
+    "key_techniques": [
+      "事件处理器替换",
+      "JSFuck无字符执行",
+      "大小写混淆",
+      "Base64编码",
+      "正则黑名单绕过"
+    ],
+    "frameworks": [
+      "JavaScript",
+      "HTML"
+    ],
+    "attack_chain": "构造编码Payload→注入点触发→窃取Cookie"
+  },
+  "JWT令牌攻击-攻击库": {
+    "doc_id": "JWT令牌攻击-攻击库",
+    "title": "JWT令牌攻击 攻击库",
+    "file_path": "knowledge/know/JWT令牌攻击-攻击库.md",
+    "content_length": 15296,
+    "last_updated": "2025-11-17T01:29:44.872967",
+    "vuln_type": "jwt",
+    "tags": [
+      "alg=none",
+      "RS256→HS256",
+      "弱密钥爆破",
+      "jwt_tool",
+      "hashcat"
+    ],
+    "summary": "通过算法混淆、密钥混淆及弱密钥爆破伪造管理员JWT令牌",
+    "difficulty": "medium",
+    "key_techniques": [
+      "alg=none签名移除",
+      "公钥当HS256密钥",
+      "hashcat 16500模式爆破"
+    ],
+    "frameworks": [
+      "Flask/Django/Node.js等通用JWT实现"
+    ],
+    "attack_chain": "伪造JWT→绕过验证→越权访问"
+  },
+  "文件包含-日志注入RCE-攻击库": {
+    "doc_id": "文件包含-日志注入RCE-攻击库",
+    "title": "文件包含-日志注入RCE 攻击库",
+    "file_path": "knowledge/know/文件包含-日志注入RCE-攻击库.md",
+    "content_length": 18601,
+    "last_updated": "2025-11-17T01:29:47.310877",
+    "vuln_type": "lfi",
+    "tags": [
+      "日志投毒",
+      "Apache日志",
+      "User-Agent注入",
+      "路径遍历",
+      "RCE升级"
+    ],
+    "summary": "向Apache日志注入PHP代码，再用LFI包含日志实现命令执行",
+    "difficulty": "medium",
+    "key_techniques": [
+      "User-Agent头部注入",
+      "路径遍历绕过",
+      "日志文件包含"
+    ],
+    "frameworks": [
+      "PHP",
+      "Apache"
+    ],
+    "attack_chain": "日志注入→LFI包含→代码执行"
+  },
+  "命令注入-过滤绕过-攻击库": {
+    "doc_id": "命令注入-过滤绕过-攻击库",
+    "title": "命令注入-过滤绕过 攻击库",
+    "file_path": "knowledge/know/命令注入-过滤绕过-攻击库.md",
+    "content_length": 12432,
+    "last_updated": "2025-11-17T01:29:47.750520",
+    "vuln_type": "command_injection",
+    "tags": [
+      "命令分隔符绕过",
+      "空格过滤绕过",
+      "关键字黑名单绕过",
+      "编码混淆",
+      "通配符",
+      "IFS变量"
+    ],
+    "summary": "利用编码、通配符与Shell特性绕过黑名单与WAF，重构命令注入载荷",
+    "difficulty": "medium",
+    "key_techniques": [
+      "${IFS}替代空格",
+      "通配符替代命令",
+      "Base64/Hex编码",
+      "引号分割关键字",
+      "反引号与$()子命令"
+    ],
+    "frameworks": [
+      "Bash",
+      "Python"
+    ],
+    "attack_chain": "编码混淆→分隔符替换→关键字变形→命令执行"
+  },
+  "GraphQL-攻击库": {
+    "doc_id": "GraphQL-攻击库",
+    "title": "GraphQL 注入 - 攻击库",
+    "file_path": "knowledge/know/GraphQL-攻击库.md",
+    "content_length": 5186,
+    "last_updated": "2025-11-17T01:29:50.567030",
+    "vuln_type": "sql_injection",
+    "tags": [
+      "GraphQL",
+      "SQL注入",
+      "权限绕过",
+      "Introspection",
+      "UNION SELECT",
+      "注释绕过"
+    ],
+    "summary": "GraphQL参数直接拼接SQL，利用OR/注释绕过权限并UNION读数据",
+    "difficulty": "easy",
+    "key_techniques": [
+      "单引号闭合",
+      "OR 1=1绕过",
+      "注释符--截断",
+      "UNION SELECT读表"
+    ],
+    "frameworks": [
+      "Strawberry GraphQL"
+    ],
+    "attack_chain": "GraphQL参数拼接→SQL注入→权限绕过→数据泄露"
+  },
+  "API-Gateway-SSRF-Redis-攻击库": {
+    "doc_id": "API-Gateway-SSRF-Redis-攻击库",
+    "title": "API Gateway SSRF + Redis GetShell 攻击库",
+    "file_path": "knowledge/know/API-Gateway-SSRF-Redis-攻击库.md",
+    "content_length": 15678,
+    "last_updated": "2025-11-22T18:11:34.770194",
+    "vuln_type": "ssrf",
+    "tags": [
+      "SSRF",
+      "Redis未授权访问",
+      "Gopher协议"
+    ],
+    "summary": "利用API Gateway的SSRF漏洞通过Gopher协议向Redis写入WebShell实现远程代码执行",
+    "difficulty": "medium",
+    "key_techniques": [
+      "Gopher协议利用",
+      "Redis RESP协议构造",
+      "WebShell写入"
+    ],
+    "frameworks": [
+      "Flask"
+    ],
+    "attack_chain": "SSRF→Gopher协议→Redis未授权访问→WebShell写入→GetShell"
+  }
+}

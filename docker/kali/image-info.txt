@@ -1,0 +1,27 @@
+H-Pentest Kali镜像信息
+========================
+
+镜像名称: h-pentest/kali:latest
+构建时间: Wed Dec  3 17:42:00 CST 2025
+构建主机: DESKTOP-ME1HCUD
+
+预装工具:
+- 网络: nmap, masscan, netcat, sslscan
+- Web扫描: nikto, gobuster, dirb, wpscan, whatweb
+- 密码攻击: hydra, john, hashcat
+- 漏洞扫描: nuclei
+- 漏洞利用: metasploit-framework
+- 信息收集: amass, recon-ng, subfinder, theharvester
+- 数据库: sqlmap
+- 其他工具: yara, radare2, binwalk, exiftool
+- Python库: pwntools, requests, beautifulsoup4
+
+使用方法:
+1. 加载镜像: docker load < h-pentest-kali.tar
+2. 运行容器: docker run -it h-pentest/kali
+3. 快速扫描: docker run h-pentest/kali quick-scan <target>
+
+注意:
+- 默认用户: pentester (UID:1000)
+- 工作目录: /workspace
+- 包含快速扫描脚本: quick-scan
