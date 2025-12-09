@@ -36,6 +36,14 @@ def execute_command(
     executor = DockerExecutor.get_instance()
     result = executor.execute(command)
     
+    # 自动提取页面信息（如果是 HTTP 请求）
+    if 'curl' in command.lower() or 'wget' in command.lower():
+        try:
+            from src.utils.page_info_extractor import extract_page_info_from_output
+            extract_page_info_from_output(command, result)
+        except Exception as e:
+            pass  # 静默失败，不影响主流程
+    
     if description:
         from src.utils.logger import log_tool_execution, default_logger
         log_tool_execution(

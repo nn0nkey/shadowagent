@@ -65,4 +65,7 @@ class PenetrationState(TypedDict):
     # 重复检测相关
     recent_response_lengths: List[int]  # 最近的响应长度列表（用于检测重复）
     strategy_switch_count: int  # 策略切换次数
+    
+    # 全局解析结果（HaE 规则提取的信息）⭐
+    parsed_info: List[Dict[str, Any]]  # 解析结果列表，每次工具执行后添加
 

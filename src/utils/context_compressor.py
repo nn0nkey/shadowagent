@@ -95,7 +95,8 @@ class ContextCompressor:
     def compress_messages(
         self,
         messages: List[BaseMessage],
-        keep_recent: int = 5
+        keep_recent: int = 5,
+        state: dict = None
     ) -> List[BaseMessage]:
         """
         压缩消息历史（渗透测试专用）
@@ -115,6 +116,7 @@ class ContextCompressor:
         Args:
             messages: 原始消息列表
             keep_recent: 保留最近的消息数量
+            state: 状态字典（包含 parsed_info 等）
         
         Returns:
             压缩后的消息列表
@@ -166,12 +168,49 @@ class ContextCompressor:
         except Exception:
             pass
         
+        # 添加解析结果（永不丢弃）⭐
+        parsed_context = ""
+        if state and "parsed_info" in state:
+            parsed_info = state.get("parsed_info", [])
+            if parsed_info:
+                # 只保留最近3次的解析结果
+                recent_parsed = parsed_info[-3:]
+                parsed_lines = ["## 🔍 自动提取的关键信息（来自工具响应）"]
+                
+                for item in recent_parsed:
+                    results = item.get("results", {})
+                    
+                    # 凭证
+                    if results.get("credentials"):
+                        parsed_lines.append("\n### 🔑 发现凭证")
+                        for cred in results["credentials"][:3]:
+                            if "username" in cred:
+                                parsed_lines.append(f"- {cred['username']}:{cred['password']}")
+                    
+                    # 提权字段
+                    if results.get("privilege_fields"):
+                        parsed_lines.append("\n### ⚠️ 提权字段")
+                        for field in results["privilege_fields"][:3]:
+                            bypassable = " (可绕过)" if field.get("bypassable") else ""
+                            parsed_lines.append(f"- {field['field']}{bypassable}")
+                    
+                    # IDOR 点
+                    if results.get("idor_points"):
+                        parsed_lines.append("\n### 🎯 IDOR 攻击点")
+                        for idor in results["idor_points"][:3]:
+                            parsed_lines.append(f"- {idor['id']}")
+                
+                if len(parsed_lines) > 1:
+                    parsed_context = "\n".join(parsed_lines)
+        
         # 组合上下文
         context_parts = []
         if pentest_context:
             context_parts.append(pentest_context)
         if key_discovery_context:
             context_parts.append(key_discovery_context)
+        if parsed_context:  # 添加解析结果 ⭐
+            context_parts.append(parsed_context)
         if repetition_context:
             context_parts.append(repetition_context)
         

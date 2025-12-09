@@ -164,6 +164,13 @@ async def run_challenge(
                 default_logger.info(f"[报告] 测试报告已保存: observability/{operation_id}/")
         except Exception as e:
             default_logger.warning(f"[报告] 保存报告失败: {e}")
+        
+        # 学习新发现的端点，更新字典
+        try:
+            from src.utils.wordlist_learner import learn_and_update_wordlist
+            learn_and_update_wordlist()
+        except Exception as e:
+            default_logger.warning(f"[学习] 更新字典失败: {e}")
 
 
 def main():

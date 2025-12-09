@@ -82,6 +82,7 @@ RUN cd /opt && \
     git clone https://github.com/GerbenJavado/LinkFinder.git && \
     cd LinkFinder && \
     pip3 install --no-cache-dir --break-system-packages -r requirements.txt && \
+    python3 setup.py install && \
     chmod +x linkfinder.py && \
     ln -sf /opt/LinkFinder/linkfinder.py /usr/local/bin/linkfinder && \
     cd /opt && \
