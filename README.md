@@ -778,19 +778,8 @@ A: 几个建议：
 
 ---
 
-## 📧 联系方式
-
-- 作者：[Your Name]
-- Email: your.email@example.com
-- 项目主页：https://github.com/yourusername/shadowagent
-- 问题反馈：https://github.com/yourusername/shadowagent/issues
-
----
-
 <div align="center">
 
 **如果这个项目对你有帮助，请给个 ⭐️ Star！**
-
-Made with ❤️ by [Your Name]
 
 </div>
