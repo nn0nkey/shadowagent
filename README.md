@@ -754,7 +754,9 @@ A: 几个建议：
 ## 📚 参考项目
 
 本项目在开发过程中参考了以下优秀项目：
-- **[luan1ao](https://github.com/luan1ao/luan1ao)** - HAE 规则引擎设计思路
-- **[LEARNING_FROM_LUAN1AO.md](LEARNING_FROM_LUAN1AO.md)** - 详细学习总结
+- **[luan1ao](https://github.com/luan1ao/luan1ao)** - HAE 规则引擎设计思路（[学习总结](LEARNING_FROM_LUAN1AO.md)）
+- **[CHYing-agent](https://github.com/CHYing-agent/CHYing-agent)** - 双 Agent 协作架构
+- **[Cyber-AutoAgent](https://github.com/Cyber-AutoAgent/Cyber-AutoAgent)** - 元认知机制
+- **[H-Pentest](https://github.com/H-Pentest/H-Pentest)** - RAG 知识库增强
 
 感谢所有开源项目的贡献者！
