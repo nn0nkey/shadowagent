@@ -8,33 +8,9 @@
 
 **基于大语言模型的双 Agent 协作架构，专为 CTF 和渗透测试设计的智能自动化框架**
 
-[English](README.md) | 简体中文
-
-[特性](#-核心特性) • [快速开始](#-快速开始) • [架构设计](#-架构设计) • [测试结果](#-测试结果)
+[特性](#-核心特性) • [快速开始](#-快速开始) • [架构设计](#-架构设计) • [测试结果](#-实战测试结果)
 
 </div>
-
----
-
-## 🆕 最新更新
-
-### v1.1 (2025-12-09)
-
-**核心改进**：
-- ✨ **HAE 规则引擎**：统一的信息提取规则（凭证、表单、API端点、IDOR指示器等）
-- 🔍 **Reflector Agent**：自动审核执行结果，判断成功/失败并分析根本原因
-- 🌐 **页面探索自动化**：初始探索时自动提取表单、链接、默认凭证
-- 🐍 **Python 脚本推荐强化**：针对 IDOR/JWT/Session 场景优先推荐自动化脚本
-- 🔧 **代码解耦优化**：删除 150+ 行硬编码正则，统一使用 HAE 规则
-
-**Bug 修复**：
-- 🐛 修复 `context_compressor` state 未定义错误
-- 🐛 修复异步事件循环冲突（Docker curl 调用）
-- 🐛 修复页面内容未传递给 HAE 解析器
-
-**参考资料**：
-- 📚 [LEARNING_FROM_LUAN1AO.md](LEARNING_FROM_LUAN1AO.md) - 从 luan1ao 项目学习的经验总结
-- 📖 [extraction_rules.yaml](src/utils/extraction_rules.yaml) - HAE 提取规则配置
 
 ---
 
@@ -767,19 +743,18 @@ A: 几个建议：
 
 ---
 
-## 🙏 致谢
-
-本项目受以下优秀项目启发：
-- [CHYing-agent](https://github.com/example/chying-agent) - 双 Agent 协作架构
-- [Cyber-AutoAgent](https://github.com/example/cyber-autoagent) - 元认知机制
-- [H-Pentest](https://github.com/example/h-pentest) - RAG 知识库
-
-感谢所有贡献者和支持者！
-
----
-
 <div align="center">
 
 **如果这个项目对你有帮助，请给个 ⭐️ Star！**
 
 </div>
+
+---
+
+## 📚 参考项目
+
+本项目在开发过程中参考了以下优秀项目：
+- **[luan1ao](https://github.com/luan1ao/luan1ao)** - HAE 规则引擎设计思路
+- **[LEARNING_FROM_LUAN1AO.md](LEARNING_FROM_LUAN1AO.md)** - 详细学习总结
+
+感谢所有开源项目的贡献者！
