@@ -48,8 +48,8 @@ htmlcov/
 .pytest_cache/
 
 # Observability reports (optional - 可以选择上传示例)
-observability/
-reports/
+# observability/
+# reports/
 
 # Memory
 memory/
@@ -67,3 +67,4 @@ Thumbs.db
 
 # Knowledge cache
 knowledge/cache/
+observability/

@@ -109,7 +109,10 @@ class RepetitionDetector:
         """
         检测重复模式
         
-        只有当请求参数相同 且 响应长度相同 连续出现 threshold 次时才触发告警
+        检测三种重复：
+        1. 完全相同的请求（参数+响应长度）
+        2. 相似的 payload（只改了值，但结构相同）
+        3. 相同的错误类型
         
         Returns:
             检测到的重复模式，如果没有则返回 None
@@ -123,7 +126,7 @@ class RepetitionDetector:
         params = [r.request_params for r in recent]
         lengths = [r.response_length for r in recent]
         
-        # 核心判断：请求参数完全相同 且 响应长度完全相同
+        # 1. 核心判断：请求参数完全相同 且 响应长度完全相同
         if len(set(params)) == 1 and len(set(lengths)) == 1 and params[0]:
             return RepetitionPattern(
                 pattern_type="identical_request",
@@ -132,7 +135,27 @@ class RepetitionDetector:
                 suggestion=self._get_repetition_suggestion(params[0], lengths[0])
             )
         
-        # 检测错误类型重复
+        # 2. 检测 payload 结构相似（只改了值，但参数名相同）
+        if self._are_payloads_similar(params):
+            return RepetitionPattern(
+                pattern_type="similar_payload",
+                value=f"相似的 payload 结构，只改了参数值",
+                count=self.threshold,
+                suggestion=self._get_similar_payload_suggestion(params, lengths)
+            )
+        
+        # 3. 检测响应长度完全相同（可能payload无效）
+        if len(set(lengths)) == 1 and lengths[0] > 0:
+            # 检查最近3次的响应长度是否完全相同
+            if all(l == lengths[0] for l in lengths):
+                return RepetitionPattern(
+                    pattern_type="identical_response_length",
+                    value=f"响应长度始终为 {lengths[0]} bytes",
+                    count=self.threshold,
+                    suggestion=self._get_identical_length_suggestion(lengths[0])
+                )
+        
+        # 4. 检测错误类型重复
         error_types = [r.error_type for r in recent if r.error_type]
         if len(error_types) >= self.threshold:
             recent_errors = error_types[-self.threshold:]
@@ -145,6 +168,81 @@ class RepetitionDetector:
                 )
         
         return None
+    
+    def _are_payloads_similar(self, params: List[str]) -> bool:
+        """
+        检测 payload 是否结构相似（只改了值，但参数名相同）
+        
+        例如：
+        - username=admin&password=admin
+        - username=test&password=test
+        - username=demo&password=demo
+        这三个payload结构相似，只是值不同
+        """
+        if not all(params):
+            return False
+        
+        # 提取参数名（忽略值）
+        param_structures = []
+        for param in params:
+            if '=' in param:
+                # key=value 格式
+                keys = [p.split('=')[0].strip() for p in param.split('&') if '=' in p]
+                param_structures.append(tuple(sorted(keys)))
+            elif '{' in param and ':' in param:
+                # JSON 格式，提取 key
+                import json
+                try:
+                    obj = json.loads(param)
+                    keys = list(obj.keys())
+                    param_structures.append(tuple(sorted(keys)))
+                except:
+                    param_structures.append(param)
+            else:
+                param_structures.append(param)
+        
+        # 如果所有 payload 的参数名结构相同，但参数值不同
+        if len(set(param_structures)) == 1 and len(set(params)) > 1:
+            return True
+        
+        return False
+    
+    def _get_similar_payload_suggestion(self, params: List[str], lengths: List[int]) -> str:
+        """生成相似 payload 的建议"""
+        suggestions = [
+            f"⚠️ 检测到相似的 payload 结构连续 {self.threshold} 次",
+            f"响应长度: {', '.join(map(str, lengths))}",
+            "",
+            "你在尝试相同的攻击方法，只是改了参数值，但结果没有变化！",
+            "",
+            "必须切换策略：",
+            "1. **改变攻击方法** - 不要再测试相同类型的 payload",
+            "2. **改变参数名** - 尝试不同的参数",
+            "3. **改变请求方式** - 从 POST 换到 GET，或反之",
+            "4. **改变注入点** - 尝试其他参数或 URL 路径",
+            "5. **使用 Python 脚本** - 编写自动化脚本批量测试",
+            "",
+            "❌ 错误做法：继续测试 username=xxx&password=yyy",
+            "✅ 正确做法：测试其他端点、其他参数、或使用不同的攻击技术",
+        ]
+        return "\n".join(suggestions)
+    
+    def _get_identical_length_suggestion(self, length: int) -> str:
+        """生成响应长度相同的建议"""
+        suggestions = [
+            f"⚠️ 最近 {self.threshold} 次请求的响应长度完全相同 ({length} bytes)",
+            "",
+            "这说明你的 payload 可能完全无效，服务器返回的是相同的错误页面或默认响应！",
+            "",
+            "必须立即切换策略：",
+            "1. **检查 payload 是否正确** - 参数名、格式、编码",
+            "2. **尝试完全不同的攻击面** - 换一个端点或参数",
+            "3. **查看响应内容** - 用 curl -v 查看详细响应",
+            "4. **检查是否有 WAF** - 可能被拦截了",
+            "",
+            "如果响应长度始终相同，说明当前方向完全错误！",
+        ]
+        return "\n".join(suggestions)
     
     def _get_repetition_suggestion(self, params: str, length: int) -> str:
         """生成重复请求的建议"""
@@ -211,17 +309,26 @@ class RepetitionDetector:
         """从工具输出中提取响应长度"""
         # 匹配常见的长度输出格式
         patterns = [
-            r'len[:\s]+(\d+)',
-            r'length[:\s]+(\d+)',
-            r'size[:\s]+(\d+)',
-            r'(\d+)\s*bytes?',
-            r'Content-Length[:\s]+(\d+)',
+            r'Content-Length[:\s]+(\d+)',          # HTTP header
+            r'len[:\s]+(\d+)',                      # len: 1234
+            r'length[:\s]+(\d+)',                   # length: 1234
+            r'size[:\s]+(\d+)',                     # size: 1234
+            r'(\d+)\s*bytes?',                      # 1234 bytes
+            r'100\s+(\d+)\s+0\s+0\s+100',          # curl 进度: 100  1234  0  0  100
+            r'100\s+(\d+)\s+100\s+(\d+)',          # curl 进度: 100  1234  100  1234
         ]
         
         for pattern in patterns:
             match = re.search(pattern, output, re.IGNORECASE)
             if match:
+                # 对于 curl 进度格式，取第一个数字（Total）
                 return int(match.group(1))
+        
+        # 如果都没匹配到，尝试从 JSON 响应中计算长度
+        # 查找 JSON 对象
+        json_match = re.search(r'\{[^{}]*\}', output)
+        if json_match:
+            return len(json_match.group(0))
         
         return None
     

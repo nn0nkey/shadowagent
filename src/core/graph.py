@@ -8,17 +8,14 @@ from langchain_core.language_models import BaseChatModel
 from src.core.state import PenetrationState
 from src.agents.advisor import advisor_node
 from src.agents.attacker import attacker_node
-from src.core.router import should_continue, should_continue_after_tool
+from src.agents.reflector import reflector_node
+from src.core.router import should_continue, should_continue_after_tool, should_continue_after_reflection
 from src.utils.logger import default_logger
 from src.utils.observability import get_tracker, OperationType
 import time
 from src.tools.command_tool import execute_command
 from src.tools.python_tool import execute_python_poc
 from src.tools.flag_tool import submit_flag
-from src.tools.memory_tool import (
-    store_memory, store_finding, store_plan, get_plan,
-    retrieve_memories, list_memories
-)
 from src.tools.knowledge_tool import search_knowledge
 import os
 
@@ -39,18 +36,12 @@ async def build_agent_graph(
     """
     default_logger.info("--- 构建双Agent协作图 ---")
     
-    # 获取所有工具（包括记忆存储工具和知识库检索工具）
+    # 获取所有工具（极简工具集：3个核心工具 + 1个知识库工具）
     tools = [
-        execute_command,
-        execute_python_poc,
-        submit_flag,
-        store_memory,
-        store_finding,
-        store_plan,
-        get_plan,
-        retrieve_memories,
-        list_memories,
-        search_knowledge  # 按需检索知识库
+        execute_command,      # 执行 Kali 工具和 shell 命令
+        execute_python_poc,   # 执行 Python 自动化脚本
+        submit_flag,          # 提交 FLAG
+        search_knowledge      # 检索知识库（按需）
     ]
     tool_node = ToolNode(tools)
     
@@ -121,12 +112,85 @@ async def build_agent_graph(
         from src.utils.key_discovery import get_key_discovery_manager
         discovery_manager = get_key_discovery_manager()
         
+        # 全局解析器：使用 HaE 规则提取关键信息（新增）⭐
+        from src.utils.global_parser import get_global_parser
+        global_parser = get_global_parser()
+        
         messages = result.get("messages", [])
         for msg in messages:
             if hasattr(msg, "content") and msg.content:
                 content = str(msg.content)
                 # 记录工具结果（截取前 500 字符）
                 report_gen.add_agent_log("attacker", "tool_result", content[:500])
+                
+                # 全局解析：使用 HaE 规则提取信息（自动缓存，相同响应只解析一次）⭐
+                if len(content) > 100:  # 只解析较长的输出
+                    parsed_results = global_parser.parse(content)
+                    
+                    # 将解析结果添加到状态中（供后续 Agent 使用）
+                    if parsed_results:
+                        # 存储到状态的 parsed_info 字段
+                        if "parsed_info" not in result:
+                            result["parsed_info"] = []
+                        result["parsed_info"].append({
+                            "tool": tool_name,
+                            "results": parsed_results,
+                            "summary": global_parser.get_summary(parsed_results)
+                        })
+                        
+                        # 将 HAE 提取结果添加到 KeyDiscoveryManager（统一管理）
+                        # 凭证（格式：{username, password, source}）
+                        if "credentials" in parsed_results and parsed_results["credentials"]:
+                            for cred_dict in parsed_results["credentials"]:
+                                # 格式化为 username:password
+                                cred_str = f"{cred_dict.get('username', '')}:{cred_dict.get('password', '')}"
+                                discovery_manager.add_discovery(
+                                    "credential",
+                                    cred_str,
+                                    source=f"hae_{tool_name}",
+                                    confidence=95
+                                )
+                                default_logger.info(f"🔍 [HAE 凭证] {cred_str}")
+                        
+                        # 表单
+                        if "form" in parsed_results:
+                            for form in parsed_results["form"]:
+                                discovery_manager.add_discovery(
+                                    "form",
+                                    form,
+                                    source=f"hae_{tool_name}",
+                                    confidence=90
+                                )
+                        
+                        # SQL 错误
+                        if "sql_error" in parsed_results:
+                            for error in parsed_results["sql_error"]:
+                                discovery_manager.add_discovery(
+                                    "injection_point",
+                                    f"SQL error: {error}",
+                                    source=f"hae_{tool_name}",
+                                    confidence=90
+                                )
+                        
+                        # IDOR 指示器
+                        if "idor_point" in parsed_results:
+                            for point in parsed_results["idor_point"]:
+                                discovery_manager.add_discovery(
+                                    "idor_point",
+                                    point,
+                                    source=f"hae_{tool_name}",
+                                    confidence=85
+                                )
+                        
+                        # 权限字段
+                        if "privilege_field" in parsed_results:
+                            for field in parsed_results["privilege_field"]:
+                                discovery_manager.add_discovery(
+                                    "privilege_field",
+                                    field,
+                                    source=f"hae_{tool_name}",
+                                    confidence=90
+                                )
                 
                 # 提取关键发现（API端点、参数名、权限限制等）
                 new_discoveries = discovery_manager.extract_from_output(content, source=tool_name or "tool")
@@ -394,6 +458,7 @@ async def build_agent_graph(
     workflow.add_node("advisor", advisor_node)
     workflow.add_node("attacker", attacker_node)
     workflow.add_node("tools", custom_tool_node)
+    workflow.add_node("reflector", reflector_node)  # 新增 Reflector 节点
     
     # 设置入口点
     workflow.set_entry_point("advisor")
@@ -414,14 +479,17 @@ async def build_agent_graph(
         }
     )
     
-    # 工具 → 条件路由
+    # 工具 → Reflector（新增：工具执行后先审核）
+    workflow.add_edge("tools", "reflector")
+    
+    # Reflector → 条件路由（新增：根据审核结果决定下一步）
     workflow.add_conditional_edges(
-        "tools",
-        should_continue_after_tool,
+        "reflector",
+        should_continue_after_reflection,
         {
-            "advisor": "advisor",
-            "attacker": "attacker",
-            "end": END
+            "advisor": "advisor",      # 继续尝试
+            "submit_flag": "tools",    # 提交 FLAG
+            "end": END                 # 终止任务
         }
     )
     

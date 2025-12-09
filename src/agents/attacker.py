@@ -11,14 +11,6 @@ from src.utils.context_compressor import ContextCompressor
 from src.tools.command_tool import execute_command
 from src.tools.python_tool import execute_python_poc
 from src.tools.flag_tool import submit_flag
-from src.tools.memory_tool import (
-    store_memory,
-    store_finding,
-    store_plan,
-    get_plan,
-    retrieve_memories,
-    list_memories,
-)
 from src.tools.knowledge_tool import search_knowledge
 import os
 import time
@@ -725,48 +717,71 @@ curl -s http://target/swagger.json
 
 **核心思想**: 过滤器有边界，找到它的盲区！
 
-## 📋 多阶段计划系统（参考Cyber-AutoAgent）
+## � Proof Pack 证据标准（防止幻觉！）
 
-**第0步**: 使用 `store_plan` 创建多阶段计划（每阶段有可衡量的标准）
+**核心原则**：没有证据 = 假设，不是事实！
 
-**计划结构**:
-```json
-{
-  "objective": "获取FLAG",
-  "current_phase": 1,
-  "total_phases": 3,
-  "phases": [
-    {"id": 1, "title": "侦察", "status": "active", "criteria": "技术栈识别完成，端点映射完成"},
-    {"id": 2, "title": "漏洞测试", "status": "pending", "criteria": "漏洞验证，PoC成功"},
-    {"id": 3, "title": "利用", "status": "pending", "criteria": "FLAG提取，证据保存"}
-  ]
-}
+### 证据等级
+1. **VERIFIED（已验证）**：有具体证据支持
+   - 响应内容、错误信息、文件内容
+   - 可复现的命令和输出
+   - 截图或日志文件
+
+2. **HYPOTHESIS（假设）**：基于推理，但未验证
+   - 需要明确标注为"假设"
+   - 说明需要什么证据来验证
+   - 不能作为后续攻击的依据
+
+### 发现记录格式（在思考中使用）
+
+**HIGH/CRITICAL 发现必须包含**：
+```
+[发现] SQL注入 - jobs参数
+[位置] POST /jobs, job_type参数
+[证据] 
+  - 命令: curl -X POST http://target/jobs -d '{"job_type":"private'\''||'\''"}' 
+  - 响应: 返回了所有private jobs（包含FLAG）
+  - 文件: 响应已保存（如果有）
+[原理] 使用 '||' 绕过了OR关键字过滤
+[置信度] 95% (VERIFIED)
 ```
 
-**检查点**（20%/40%/60%/80%进度时）: 调用 `get_plan` → 评估标准 vs 证据 → 更新状态
-- 状态: `active` | `pending` | `done` | `partial_failure`（卡住，需要不同能力）| `blocked`（依赖失败）
+**假设性发现必须标注**：
+```
+[假设] 可能存在IDOR漏洞
+[位置] /api/users/{id}
+[推理] 响应中包含user_id字段
+[需要验证] 
+  1. 测试修改user_id参数
+  2. 观察是否返回其他用户数据
+[置信度] 30% (HYPOTHESIS)
+```
 
-**切换规则**: 状态 = `partial_failure`/`blocked` → 下一个行动使用**不同**能力类别
+### 防止幻觉的规则
 
-## 📦 Proof Pack 证据标准（参考Cyber-AutoAgent）
+❌ **禁止的行为**：
+- "我认为存在SQL注入" → 没有测试就下结论
+- "应该可以用XXE攻击" → 没有证据就假设
+- "登录页面在/admin" → 没有访问就猜测
+- "参数是user_id" → 没有提取就编造
 
-**证据标准**:
-- **HIGH/CRITICAL发现**: 必须包含 `{artifacts:["路径"], rationale:"为什么"}` + 对照案例
-- **无证据 = 假设**: 设置 `validation_status="hypothesis"`（不是"verified"）
-- **格式**: `[漏洞] 标题 [位置] 位置 [影响] 影响 [证据] 路径 [置信度] %`
+✅ **正确的行为**：
+- "测试了SQL注入，响应包含数据库错误" → 有证据
+- "访问了/admin，返回登录表单" → 已验证
+- "从JS代码中提取到参数名job_type" → 有来源
+- "尝试了XXE，但被过滤" → 测试过了
 
-**发现记录仪式**（存储发现前）:
-1. 设置 `validation_status=verified|hypothesis`
-2. 包含简短的 Proof Pack（证据路径 + 一行理由）
-3. 在 `[STEPS]` 中包含: 前置条件、命令、预期、实际、证据、环境、清理、备注
+### 关键发现管理（自动化）
 
-**使用 `store_finding` 工具记录发现**:
-- title: 漏洞类型 + 位置
-- severity: 根据影响评估
-- evidence: 实际响应/截图
-- validation_status: verified（已验证）或 hypothesis（假设）
-- artifacts: 证据文件路径
-- rationale: 一句话说明为什么这是漏洞
+**系统会自动提取和记录**：
+- 登录页面、API端点、凭证信息会被自动识别
+- 漏洞发现会被自动记录到关键发现列表
+- 所有发现会在后续操作中自动展示
+
+**你的职责**：
+- 在思考中使用 Proof Pack 格式说明发现
+- 明确区分"已验证"和"假设"
+- 系统会自动提取并管理关键信息
 
 ## 🎯 行动前推理格式
 
@@ -894,6 +909,54 @@ search_knowledge(query="XSS绕过")
 
 {get_inline_knowledge(knowledge_keywords)}
 """
+    
+    # 添加解析结果（从响应中自动提取的关键信息）⭐
+    parsed_info = state.get("parsed_info", [])
+    if parsed_info:
+        # 只显示最近3次的解析结果
+        recent_parsed = parsed_info[-3:]
+        
+        base_prompt += "\n\n## 🔍 自动提取的关键信息（来自工具响应）\n\n"
+        
+        for item in recent_parsed:
+            tool = item.get("tool", "unknown")
+            results = item.get("results", {})
+            
+            # 凭证信息
+            if results.get("credentials"):
+                base_prompt += "### 🔑 发现凭证\n"
+                for cred in results["credentials"][:3]:
+                    if "username" in cred:
+                        base_prompt += f"- **{cred['username']}:{cred['password']}** (来源: {cred['source']})\n"
+                    elif "type" in cred:
+                        base_prompt += f"- **{cred['type']}**: {cred.get('value', '')[:50]}\n"
+            
+            # 提权字段
+            if results.get("privilege_fields"):
+                base_prompt += "\n### ⚠️ 提权字段\n"
+                for field in results["privilege_fields"][:3]:
+                    bypassable = " **(disabled，可绕过！)**" if field.get("bypassable") else ""
+                    base_prompt += f"- **{field['field']}**{bypassable}\n"
+            
+            # IDOR 点
+            if results.get("idor_points"):
+                base_prompt += "\n### 🎯 IDOR 攻击点\n"
+                for idor in results["idor_points"][:3]:
+                    base_prompt += f"- ID: **{idor['id']}**\n"
+            
+            # 指纹信息
+            if results.get("fingerprints"):
+                base_prompt += "\n### 🔍 技术指纹\n"
+                for fp in results["fingerprints"][:3]:
+                    base_prompt += f"- **{fp['name']}**: {fp['value'][:50]}\n"
+            
+            # 漏洞指示器
+            if results.get("vulnerabilities"):
+                base_prompt += "\n### ⚡ 漏洞指示器\n"
+                for vuln in results["vulnerabilities"][:3]:
+                    base_prompt += f"- **{vuln['name']}**: {vuln['indicator'][:50]}\n"
+        
+        base_prompt += "\n**💡 提示**：这些信息是从工具响应中自动提取的，请充分利用！\n"
     
     # 添加顾问建议（强制优先级）
     advisor_suggestion = state.get("advisor_suggestion")
@@ -1086,6 +1149,102 @@ async def attacker_node(state: PenetrationState) -> PenetrationState:
     """
     log_agent_thought(default_logger, "[主攻手Agent] 开始决策...")
     
+    # 🔍 初始探索：第一次执行时进行快速探索
+    attempt_count = state.get("attempt_count", 0)
+    if attempt_count == 0:
+        challenge = state.get("current_challenge")
+        if challenge:
+            target_url = challenge.get("target_url")
+            if target_url:
+                default_logger.info("🔍 [初始探索] 第一次执行，进行快速探索...")
+                
+                try:
+                    from src.utils.page_explorer import explore_target_initial
+                    from src.utils.key_discovery import get_key_discovery_manager
+                    
+                    # 只做快速探索（技术栈识别、API文档检查、路径扫描）
+                    exploration_result = explore_target_initial(target_url, timeout=30)
+                    discovery_manager = get_key_discovery_manager()
+                    
+                    # 记录技术栈
+                    base_info = exploration_result.get('base_info', {})
+                    if base_info.get('tech_stack'):
+                        tech_stack_str = ', '.join(base_info['tech_stack'])
+                        discovery_manager.add_discovery(
+                            "tech_stack", 
+                            tech_stack_str,
+                            source="initial_exploration",
+                            confidence=95
+                        )
+                    
+                    # 记录发现的路径
+                    for path in exploration_result.get('paths', []):
+                        discovery_manager.add_discovery(
+                            "path", 
+                            path,
+                            source="path_scan",
+                            confidence=90
+                        )
+                    
+                    # 记录 API 端点
+                    for endpoint in exploration_result.get('api_endpoints', []):
+                        discovery_manager.add_discovery(
+                            "api_endpoint",
+                            endpoint,
+                            source="api_docs",
+                            confidence=85
+                        )
+                    
+                    # 记录表单
+                    for form in exploration_result.get('forms', []):
+                        form_desc = f"{form.get('method', 'GET')} {form.get('action', '')} (fields: {', '.join(form.get('inputs', []))})"
+                        discovery_manager.add_discovery(
+                            "form",
+                            form_desc,
+                            source="page_content",
+                            confidence=90
+                        )
+                    
+                    # 记录链接
+                    for link in exploration_result.get('links', []):
+                        discovery_manager.add_discovery(
+                            "path",
+                            link,
+                            source="page_content",
+                            confidence=80
+                        )
+                    
+                    # 使用 HAE 解析页面内容提取凭证等信息
+                    page_content = exploration_result.get('page_content', '')
+                    if page_content and len(page_content) > 100:
+                        from src.utils.global_parser import get_global_parser
+                        global_parser = get_global_parser()
+                        parsed_results = global_parser.parse(page_content)
+                        
+                        # 提取凭证
+                        if parsed_results.get("credentials"):
+                            for cred_dict in parsed_results["credentials"]:
+                                cred_str = f"{cred_dict.get('username', '')}:{cred_dict.get('password', '')}"
+                                discovery_manager.add_discovery(
+                                    "credential",
+                                    cred_str,
+                                    source="hae_initial_page",
+                                    confidence=95
+                                )
+                                default_logger.info(f"🔍 [HAE 凭证] {cred_str}")
+                    
+                    default_logger.info(f"✅ [初始探索] 完成：技术栈={base_info.get('tech_stack', [])}, "
+                                      f"路径={len(exploration_result.get('paths', []))}, "
+                                      f"API={len(exploration_result.get('api_endpoints', []))}, "
+                                      f"表单={len(exploration_result.get('forms', []))}, "
+                                      f"链接={len(exploration_result.get('links', []))}")
+                    default_logger.info("💡 [提示] 每次访问页面时会自动提取表单、链接、参数等信息")
+                    
+                except Exception as e:
+                    default_logger.warning(f"⚠️ [初始探索] 失败: {e}")
+                    import traceback
+                    default_logger.debug(traceback.format_exc())
+    
     # 初始化主攻手LLM
     attacker_provider = os.getenv("LLM_PROVIDER", "openai")
     attacker_model = os.getenv("LLM_MODEL", "gpt-4o")
@@ -1098,18 +1257,12 @@ async def attacker_node(state: PenetrationState) -> PenetrationState:
     
     attacker_llm = attacker_llm_client.get_llm()
     
-    # 绑定工具（包括记忆存储工具和知识库检索工具）
+    # 绑定工具（极简工具集：3个核心工具 + 1个知识库工具）
     tools = [
-        execute_command,
-        execute_python_poc,
-        submit_flag,
-        store_memory,
-        store_finding,
-        store_plan,
-        get_plan,
-        retrieve_memories,
-        list_memories,
-        search_knowledge  # 按需检索知识库
+        execute_command,      # 执行 Kali 工具和 shell 命令
+        execute_python_poc,   # 执行 Python 自动化脚本
+        submit_flag,          # 提交 FLAG
+        search_knowledge      # 检索知识库（按需）
     ]
     attacker_llm_with_tools = attacker_llm.bind_tools(tools)
     
@@ -1146,7 +1299,7 @@ async def attacker_node(state: PenetrationState) -> PenetrationState:
     
     if compressor.should_compress(messages):
         original_count = len(messages)
-        messages = compressor.compress_messages(messages, keep_recent=10)
+        messages = compressor.compress_messages(messages, keep_recent=10, state=state)
         default_logger.info(f"📦 智能压缩: {original_count} → {len(messages)} 条消息")
     
     # 追踪Agent决策

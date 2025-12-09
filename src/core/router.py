@@ -318,3 +318,171 @@ def should_continue_after_tool(state: PenetrationState) -> Literal["advisor", "a
     )
     return "attacker"
 
+
+def should_continue_after_reflection(state: PenetrationState) -> Literal["advisor", "submit_flag", "end"]:
+    """
+    Reflector 审核后的路由函数
+    
+    根据 Reflector 的审核结果决定下一步：
+    - VERIFIED: 提交 FLAG 或继续
+    - FAILED L1-L2: 返回 Advisor 重新规划
+    - FAILED L3: 强制切换策略，返回 Advisor
+    - FAILED L4: 终止任务
+    - PARTIAL: 返回 Advisor 继续
+    
+    Args:
+        state: 当前状态
+    
+    Returns:
+        下一个节点名称
+    """
+    tracker = get_tracker()
+    
+    # 获取 Reflector 的审核结果
+    last_reflection = state.get("last_reflection")
+    
+    if not last_reflection:
+        default_logger.warning("[Router-Reflection] ⚠️ 没有找到审核结果，默认返回 Advisor")
+        return "advisor"
+    
+    audit_result = last_reflection.get("audit_result", {})
+    status = audit_result.get("status", "FAILED")
+    confidence = audit_result.get("confidence", 0.0)
+    
+    # 检查是否超限
+    attempt_count = state.get("attempt_count", 0)
+    max_attempts = state.get("max_attempts", 50)
+    
+    if attempt_count >= max_attempts:
+        default_logger.warning(f"[Router-Reflection] ⚠️ 尝试次数超限 ({attempt_count}/{max_attempts})")
+        return "end"
+    
+    # 1. VERIFIED - 验证成功
+    if status == "VERIFIED":
+        default_logger.info(f"[Router-Reflection] ✅ Reflector 验证成功 (置信度: {confidence:.2f})")
+        
+        # 检查是否有 FLAG
+        if state.get("flag"):
+            default_logger.info(f"[Router-Reflection] ✅ 已找到 FLAG: {state.get('flag')}")
+            return "end"
+        
+        # 检查消息中是否包含 FLAG
+        from src.tools.flag_tool import extract_and_verify_flag
+        messages = state.get("messages", [])
+        for msg in messages[-3:]:
+            if hasattr(msg, "content") and msg.content:
+                verified_flag = extract_and_verify_flag(str(msg.content))
+                if verified_flag:
+                    default_logger.info(f"[Router-Reflection] ✅ 在消息中检测到 FLAG: {verified_flag}")
+                    # 设置 FLAG 到状态
+                    state["flag"] = verified_flag
+                    return "end"
+        
+        # 任务完成但不是 FLAG（例如：成功登录）
+        default_logger.info("[Router-Reflection] ✅ 任务阶段完成，继续下一步")
+        state["consecutive_failures"] = 0  # 重置连续失败计数
+        return "advisor"
+    
+    # 2. FAILED - 失败
+    elif status == "FAILED":
+        failure_analysis = last_reflection.get("failure_analysis", {})
+        failure_level = failure_analysis.get("level", "L1")
+        root_cause = failure_analysis.get("root_cause", "未知")
+        
+        default_logger.warning(
+            f"[Router-Reflection] ❌ Reflector 判断失败: {failure_level} - {root_cause}"
+        )
+        
+        # 更新连续失败计数
+        consecutive_failures = state.get("consecutive_failures", 0) + 1
+        state["consecutive_failures"] = consecutive_failures
+        
+        # L5: 战略失败 - 终止任务
+        if failure_level == "L5":
+            default_logger.error(
+                f"[Router-Reflection] ⛔ L5 失败（战略失败），终止任务"
+            )
+            if tracker:
+                tracker.record_router_decision("end", reason=f"L5 失败: {root_cause}")
+            return "end"
+        
+        # L4: 假设被证伪 - 强制切换策略
+        elif failure_level == "L4":
+            default_logger.warning(
+                f"[Router-Reflection] 🔄 L4 失败（假设被证伪），强制切换策略"
+            )
+            # 设置标志，让 Advisor 知道需要切换策略
+            state["force_strategy_switch"] = True
+            # 清空部分上下文，避免思维定式
+            messages = state.get("messages", [])
+            if len(messages) > 10:
+                state["messages"] = messages[-10:]
+                default_logger.info("[Router-Reflection] 清空部分上下文，避免思维定式")
+            
+            if tracker:
+                tracker.record_router_decision("advisor", reason=f"L4 失败，切换策略")
+            return "advisor"
+        
+        # L3: 环境干扰 - 调整策略
+        elif failure_level == "L3":
+            default_logger.warning(
+                f"[Router-Reflection] 🔄 L3 失败（环境干扰），调整策略"
+            )
+            # 将 Reflector 的建议传递给 Advisor
+            recommendations = failure_analysis.get("recommendations", [])
+            if recommendations:
+                state["reflector_recommendations"] = recommendations
+            
+            if tracker:
+                tracker.record_router_decision("advisor", reason=f"L3 失败，环境干扰")
+            return "advisor"
+        
+        # L2: 前提条件失败 - 重新满足前提
+        elif failure_level == "L2":
+            default_logger.warning(
+                f"[Router-Reflection] 🔄 L2 失败（前提条件失败），重新满足前提"
+            )
+            # 将 Reflector 的建议传递给 Advisor
+            recommendations = failure_analysis.get("recommendations", [])
+            if recommendations:
+                state["reflector_recommendations"] = recommendations
+            
+            if tracker:
+                tracker.record_router_decision("advisor", reason=f"L2 失败，前提条件")
+            return "advisor"
+        
+        # L0-L1: 工具失败 - 可重试
+        else:
+            default_logger.info(
+                f"[Router-Reflection] 🔄 {failure_level} 失败（可重试），返回 Advisor"
+            )
+            # 将 Reflector 的建议传递给 Advisor
+            recommendations = failure_analysis.get("recommendations", [])
+            if recommendations:
+                state["reflector_recommendations"] = recommendations
+            
+            if tracker:
+                tracker.record_router_decision("advisor", reason=f"{failure_level} 失败")
+            return "advisor"
+    
+    # 3. PARTIAL - 部分成功
+    elif status == "PARTIAL":
+        default_logger.info(
+            f"[Router-Reflection] 🟡 Reflector 判断部分成功 (置信度: {confidence:.2f})"
+        )
+        # 重置连续失败计数
+        state["consecutive_failures"] = 0
+        # 记录部分成功
+        intelligence = last_reflection.get("intelligence", {})
+        if "partial_successes" not in state:
+            state["partial_successes"] = []
+        state["partial_successes"].append(intelligence)
+        
+        if tracker:
+            tracker.record_router_decision("advisor", reason="部分成功，继续")
+        return "advisor"
+    
+    # 默认：返回 Advisor
+    default_logger.warning(f"[Router-Reflection] ⚠️ 未知状态: {status}，默认返回 Advisor")
+    return "advisor"
+

@@ -1,0 +1,176 @@
+rules:
+  - group: Credentials & Auth
+    rule:
+      - name: Username Password Pair in HTML
+        loaded: true
+        f_regex: '<strong>Username:</strong>\s+(\w+).*?<strong>Password:</strong>\s+(\w+)'
+        s_regex: ''
+        format: '{0}:{1}'
+        scope: response body
+        engine: nfa
+        extract_type: credentials
+      
+      - name: Demo Account Hint
+        loaded: true
+        f_regex: '(demo|test)\s+(account|user|username|login)'
+        s_regex: ''
+        format: '{0}'
+        scope: response body
+        engine: nfa
+        extract_type: hint
+      
+      - name: JSON Web Token
+        loaded: true
+        f_regex: '(eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9._-]{10,}|eyJ[A-Za-z0-9_\/+-]{10,}\.[A-Za-z0-9._\/+-]{10,})'
+        s_regex: ''
+        format: '{0}'
+        scope: any
+        engine: nfa
+        extract_type: token
+
+  - group: Privilege Escalation
+    rule:
+      - name: Admin Field with Disabled
+        loaded: true
+        f_regex: 'name="(is_admin|admin|role|permission|level)"[^>]*disabled'
+        s_regex: ''
+        format: '{0}'
+        scope: response body
+        engine: nfa
+        extract_type: privilege_field
+      
+      - name: Admin Field
+        loaded: true
+        f_regex: 'name="(is_admin|admin|role|permission|level)"'
+        s_regex: ''
+        format: '{0}'
+        scope: response body
+        engine: dfa
+        extract_type: privilege_field
+      
+      - name: Select Options
+        loaded: true
+        f_regex: '<option\s+value="(\d+)"[^>]*>(Admin|Regular|User|Manager)</option>'
+        s_regex: ''
+        format: '{0}={1}'
+        scope: response body
+        engine: nfa
+        extract_type: privilege_options
+
+  - group: IDOR Indicators
+    rule:
+      - name: User ID in URL
+        loaded: true
+        f_regex: '/(user|profile|account|member|company)/(\d+)'
+        s_regex: ''
+        format: '{0}/{1}'
+        scope: any
+        engine: nfa
+        extract_type: idor_point
+      
+      - name: ID Parameter
+        loaded: true
+        f_regex: '(user_id|uid|id|company_id|profile_id)=(\d+)'
+        s_regex: ''
+        format: '{0}={1}'
+        scope: any
+        engine: nfa
+        extract_type: idor_point
+
+  - group: Forms & Inputs
+    rule:
+      - name: Form Action
+        loaded: true
+        f_regex: '<form[^>]*action="([^"]+)"[^>]*method="(\w+)"'
+        s_regex: ''
+        format: '{1} {0}'
+        scope: response body
+        engine: nfa
+        extract_type: form
+      
+      - name: Input Field
+        loaded: true
+        f_regex: '<input[^>]*name="([^"]+)"[^>]*type="([^"]+)"'
+        s_regex: ''
+        format: '{0}({1})'
+        scope: response body
+        engine: nfa
+        extract_type: input_field
+      
+      - name: Hidden Field
+        loaded: true
+        f_regex: '<input[^>]*type="hidden"[^>]*name="([^"]+)"[^>]*value="([^"]*)"'
+        s_regex: ''
+        format: '{0}={1}'
+        scope: response body
+        engine: nfa
+        extract_type: hidden_field
+
+  - group: Sensitive Information
+    rule:
+      - name: Password Field
+        loaded: true
+        f_regex: '(((|\\)(|''|")(|[\.\w]{1,32})([p](ass|wd|asswd|assword))(|[\.\w]{1,32})(|\\)(|''|")(|)(:|[=]{1,3}|![=]{1,2}|[\)]{0,1}\.val\()( |)(|\\)(''|")([^''"]+?)(|\\)(''|")(|,|\)))|((|\\)(''|")([^''"]+?)(|\\)(''|")(|\\)(|''|")(|)(:|[=]{1,3}|![=]{1,2})( |)(|[\.\w]{1,32})([p](ass|wd|asswd|assword))(|[\.\w]{1,32})(|\\)(|''|")))'
+        s_regex: ''
+        format: '{0}'
+        scope: response body
+        engine: nfa
+        extract_type: password
+      
+      - name: Username Field
+        loaded: true
+        f_regex: '(((|\\)(|''|")(|[\.\w]{1,32})(([u](ser|name|sername))|(account))(|[\.\w]{1,32})(|\\)(|''|")(|)(:|[=]{1,3}|![=]{1,2}|[\)]{0,1}\.val\()( |)(|\\)(''|")([^''"]+?)(|\\)(''|")(|,|\)))|((|\\)(''|")([^''"]+?)(|\\)(''|")(|\\)(|''|")(|)(:|[=]{1,3}|![=]{1,2})( |)(|[\.\w]{1,32})(([u](ser|name|sername))|(account))(|[\.\w]{1,32})(|\\)(|''|")))'
+        s_regex: ''
+        format: '{0}'
+        scope: response body
+        engine: nfa
+        extract_type: username
+      
+      - name: JDBC Connection
+        loaded: true
+        f_regex: '(jdbc:[a-z:]+://[a-z0-9\.\-_:;=/@?,&]+)'
+        s_regex: ''
+        format: '{0}'
+        scope: any
+        engine: nfa
+        extract_type: secret
+
+  - group: API Endpoints
+    rule:
+      - name: API Path
+        loaded: true
+        f_regex: '["''](/api/[a-zA-Z0-9_\-/]+)["'']'
+        s_regex: ''
+        format: '{0}'
+        scope: response body
+        engine: nfa
+        extract_type: api_endpoint
+      
+      - name: REST Endpoint
+        loaded: true
+        f_regex: '["''](/([\w\-]+)/\{[\w\-]+\})["'']'
+        s_regex: ''
+        format: '{0}'
+        scope: response body
+        engine: nfa
+        extract_type: rest_endpoint
+
+  - group: Error Messages
+    rule:
+      - name: SQL Error
+        loaded: true
+        f_regex: '(SQL syntax|mysql_|pg_|sqlite_|ORA-\d+)'
+        s_regex: ''
+        format: '{0}'
+        scope: response body
+        engine: dfa
+        extract_type: sql_error
+      
+      - name: Error Message
+        loaded: true
+        f_regex: '(error|exception|warning|failed|incorrect):\s*(.{1,100})'
+        s_regex: ''
+        format: '{0}: {1}'
+        scope: response body
+        engine: nfa
+        extract_type: error

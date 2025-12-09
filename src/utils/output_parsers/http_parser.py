@@ -14,8 +14,32 @@ class HttpParser(BaseOutputParser):
     tool_name = "http"
     tool_patterns = ["HTTP/", "Status:", "Content-Type:", "<!DOCTYPE", "<html"]
     
+    def __init__(self):
+        super().__init__()
+        # 延迟导入，避免循环依赖
+        self._extractor = None
+    
+    @property
+    def extractor(self):
+        """延迟加载规则提取器"""
+        if self._extractor is None:
+            try:
+                from src.utils.rule_based_extractor import get_extractor
+                self._extractor = get_extractor()
+            except Exception:
+                self._extractor = None
+        return self._extractor
+    
     def parse(self, output: str) -> ParsedOutput:
         result = ParsedOutput(tool_name=self.tool_name)
+        
+        # 第一步：使用规则提取器提取关键信息（新增）⭐
+        if self.extractor and len(output) > 100:  # 只对较长的输出使用规则提取
+            try:
+                extracted = self.extractor.extract(output, scope='critical')
+                self._merge_extracted_info(result, extracted)
+            except Exception as e:
+                pass  # 降级到原有逻辑
         
         # 提取FLAG
         result.flags = self._extract_flags(output)
@@ -104,3 +128,47 @@ class HttpParser(BaseOutputParser):
             result.success = False
         
         return result
+    
+    def _merge_extracted_info(self, result: ParsedOutput, extracted: dict):
+        """将规则提取的信息合并到结果中"""
+        # 凭证信息
+        for cred in extracted.get('credentials', []):
+            if 'username' in cred and 'password' in cred:
+                result.findings.append(
+                    f"🔑 发现凭证: {cred['username']}:{cred['password']} (来源: {cred['source']})"
+                )
+            elif 'type' in cred:
+                result.findings.append(
+                    f"🔑 认证信息: {cred['type']} {cred.get('value', '')[:50]}"
+                )
+        
+        # 提权字段
+        for field in extracted.get('privilege_fields', []):
+            bypassable = " (disabled，可绕过)" if field.get('bypassable') else ""
+            result.findings.append(
+                f"⚠️ 提权字段: {field['field']}{bypassable}"
+            )
+        
+        # IDOR 点
+        for idor in extracted.get('idor_points', []):
+            result.findings.append(
+                f"🎯 IDOR 攻击点: ID={idor['id']} ({idor['type']})"
+            )
+        
+        # API 端点
+        for api in extracted.get('api_endpoints', []):
+            param_note = " (有参数)" if api.get('has_param') else ""
+            result.urls.append(api['endpoint'])
+            result.findings.append(f"🔗 API: {api['endpoint']}{param_note}")
+        
+        # 漏洞指示器
+        for vuln in extracted.get('vulnerabilities', []):
+            result.findings.append(
+                f"⚡ 漏洞指示器: {vuln['type']} - {vuln['indicator'][:50]}"
+            )
+        
+        # 提示信息
+        for hint in extracted.get('hints', []):
+            result.findings.append(
+                f"💡 提示: {hint['content'][:100]}"
+            )
